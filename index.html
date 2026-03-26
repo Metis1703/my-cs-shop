@@ -1,133 +1,106 @@
-<?php
-session_start();
-// Имитация базы данных
-if (!isset($_SESSION['shop_db'])) {
-    $_SESSION['shop_db'] = ['admin' => ['pass' => '123', 'balance' => 5000, 'items' => []]];
-}
-$user = $_SESSION['user'] ?? null;
-
-// Логика авторизации
-if (isset($_POST['auth'])) {
-    $login = htmlspecialchars($_POST['login']);
-    $_SESSION['shop_db'][$login] = $_SESSION['shop_db'][$login] ?? ['pass' => $_POST['pass'], 'balance' => 0, 'items' => []];
-    $_SESSION['user'] = $login;
-    header("Location: index.php");
-}
-if (isset($_GET['logout'])) { session_destroy(); header("Location: index.php"); }
-?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CS 1.6 Market — Официальный сайт</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 1.6 Premium Market</title>
     <style>
-        :root { --main: #ff9d00; --bg: #0d1117; --card: #161b22; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; scroll-behavior: smooth; }
+        :root { --main: #ff9d00; --bg: #0b0e11; --card: #161b22; --text: #c9d1d9; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; scroll-behavior: smooth; }
         
-        /* ВЕРХНЕЕ МЕНЮ (НАВИГАЦИЯ) */
-        nav { background: #000; padding: 15px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid var(--main); display: flex; justify-content: center; gap: 30px; }
-        nav a { color: #fff; text-decoration: none; font-weight: bold; text-transform: uppercase; font-size: 14px; transition: 0.3s; }
+        /* ВЕРХНЕЕ МЕНЮ */
+        nav { background: #000; padding: 15px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 2px solid var(--main); display: flex; justify-content: center; gap: 20px; box-sizing: border-box; }
+        nav a { color: #fff; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; transition: 0.3s; }
         nav a:hover { color: var(--main); }
 
-        header { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://img.freepik.com'); background-size: cover; padding: 120px 20px 60px; text-align: center; }
-        .container { max-width: 1100px; margin: auto; padding: 20px; }
-        
-        /* БЛОК СВЯЗИ */
-        .contact-dev { background: #1c2128; border: 1px dashed var(--main); padding: 20px; border-radius: 10px; margin-bottom: 40px; }
-        .contact-dev b { color: var(--main); }
+        header { padding: 120px 20px 60px; text-align: center; background: radial-gradient(circle, rgba(255,157,0,0.1) 0%, transparent 70%); }
+        h1 { font-size: 3rem; margin: 0; color: #fff; text-transform: uppercase; }
+        h1 span { color: var(--main); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 12px; transition: 0.3s; text-align: center; }
+        .container { max-width: 1100px; margin: auto; padding: 20px; }
+
+        /* БЛОК СВЯЗИ */
+        .dev-box { background: #1c2128; border: 1px dashed var(--main); padding: 20px; border-radius: 12px; margin-bottom: 40px; text-align: center; }
+        .dev-box b { color: var(--main); }
+
+        /* КАТЕГОРИИ */
+        .section-title { font-size: 22px; color: var(--main); margin: 50px 0 20px; text-transform: uppercase; border-left: 4px solid var(--main); padding-left: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 12px; text-align: center; transition: 0.3s; }
         .card:hover { border-color: var(--main); transform: translateY(-5px); }
+        .price { font-size: 24px; color: #fff; font-weight: bold; margin: 15px 0; }
         
-        .btn { background: var(--main); color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 5px; text-decoration: none; display: inline-block; margin-top: 15px; }
-        .section-title { font-size: 24px; color: var(--main); margin-top: 50px; text-transform: uppercase; border-left: 5px solid var(--main); padding-left: 15px; text-align: left; }
+        .buy-btn { background: var(--main); color: #000; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; display: inline-block; transition: 0.2s; }
+        .buy-btn:hover { background: #fff; box-shadow: 0 0 15px var(--main); }
+
+        footer { padding: 50px; text-align: center; opacity: 0.4; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<!-- НАВИГАЦИЯ -->
 <nav>
-    <a href="#plugins">Покупка плагинов</a>
-    <a href="#models">Покупка моделей</a>
-    <a href="#servers">Покупка сборки</a>
-    <a href="#contacts">Связь с разработчиком</a>
+    <a href="#plugins">Плагины</a>
+    <a href="#models">Модели</a>
+    <a href="#servers">Сборки</a>
+    <a href="#contacts">Разработчикам</a>
 </nav>
 
 <header>
-    <h1>CS <span style="color:var(--main)">MARKET</span> PRO</h1>
-    <p>Все для твоего сервера Counter-Strike 1.6 в одном месте</p>
+    <h1>CS <span>MARKET</span></h1>
+    <p>Магазин топовых дополнений для Counter-Strike 1.6</p>
 </header>
 
 <div class="container">
-    
-    <!-- БЛОК СВЯЗИ С РАЗРАБОТЧИКОМ -->
-    <div id="contacts" class="contact-dev">
-        <h3>📩 Написать разработчикам:</h3>
-        <p>Наша почта: <b>support-cs16@mail.ru</b></p>
-        <p>Telegram: <b>@твой_ник</b></p>
-        <small>Пишите по вопросам настройки, багов или возврата средств</small>
+
+    <!-- СВЯЗЬ С РАЗРАБОТЧИКАМИ -->
+    <div id="contacts" class="dev-box">
+        <h3>📩 СВЯЗЬ С РАЗРАБОТЧИКАМИ</h3>
+        <p>По вопросам и поддержке: <b>support-shop@mail.ru</b></p>
+        <p>Telegram: <b>@твой_логин</b></p>
     </div>
 
-    <?php if (!$user): ?>
-    <div class="card">
-        <h3>Вход в кабинет</h3>
-        <form method="POST">
-            <input type="text" name="login" placeholder="Логин" required style="padding:10px; margin:5px;">
-            <input type="password" name="pass" placeholder="Пароль" required style="padding:10px; margin:5px;">
-            <button type="submit" name="auth" class="btn">Войти</button>
-        </form>
-    </div>
-    <?php else: ?>
-    <div class="card" style="border-style: double;">
-        <h2>Вы вошли как: <span style="color:var(--main)"><?php echo $user; ?></span></h2>
-        <p>Ваш баланс: <b><?php echo $_SESSION['shop_db'][$user]['balance']; ?> руб.</b></p>
-        <a href="?logout" style="color:#666; font-size:12px;">[ Выйти ]</a>
-    </div>
-    <?php endif; ?>
-
-    <!-- КАТЕГОРИЯ: ПЛАГИНЫ -->
-    <div id="plugins" class="section-title">Купить плагины</div>
+    <!-- РАЗДЕЛ: ПЛАГИНЫ -->
+    <div id="plugins" class="section-title">Покупка плагинов</div>
     <div class="grid">
         <div class="card">
             <h3>VIP System Gold</h3>
-            <p>Золотое оружие, дамаг и меню.</p>
-            <div style="font-size:20px; font-weight:bold;">250 ₽</div>
-            <a href="#" class="btn">КУПИТЬ</a>
+            <p>Золотое оружие + меню.</p>
+            <div class="price">250 ₽</div>
+            <a href="https://t.me" class="buy-btn">КУПИТЬ</a>
         </div>
         <div class="card">
-            <h3>Army Ranks Ultimate</h3>
-            <p>Система званий и бонусов.</p>
-            <div style="font-size:20px; font-weight:bold;">300 ₽</div>
-            <a href="#" class="btn">КУПИТЬ</a>
-        </div>
-    </div>
-
-    <!-- КАТЕГОРИЯ: МОДЕЛИ -->
-    <div id="models" class="section-title">Купить модели</div>
-    <div class="grid">
-        <div class="card">
-            <h3>Скин "Админ Лето"</h3>
-            <p>HD модель для CT и T.</p>
-            <div style="font-size:20px; font-weight:bold;">150 ₽</div>
-            <a href="#" class="btn">КУПИТЬ</a>
+            <h3>Army Ranks</h3>
+            <p>Система рангов и званий.</p>
+            <div class="price">300 ₽</div>
+            <a href="https://t.me" class="buy-btn">КУПИТЬ</a>
         </div>
     </div>
 
-    <!-- КАТЕГОРИЯ: СБОРКИ -->
-    <div id="servers" class="section-title">Купить сборку сервера</div>
+    <!-- РАЗДЕЛ: МОДЕЛИ -->
+    <div id="models" class="section-title">Покупка моделей</div>
     <div class="grid">
         <div class="card">
-            <h3>Public Full Pack 2024</h3>
-            <p>Готовый сервер "под ключ".</p>
-            <div style="font-size:20px; font-weight:bold;">850 ₽</div>
-            <a href="#" class="btn">КУПИТЬ</a>
+            <h3>Admin Skin HD</h3>
+            <p>Эксклюзивный скин админа.</p>
+            <div class="price">150 ₽</div>
+            <a href="https://t.me" class="buy-btn">КУПИТЬ</a>
+        </div>
+    </div>
+
+    <!-- РАЗДЕЛ: СБОРКИ -->
+    <div id="servers" class="section-title">Покупка сборок</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Classic Public</h3>
+            <p>Готовая сборка сервера.</p>
+            <div class="price">850 ₽</div>
+            <a href="https://t.me" class="buy-btn">КУПИТЬ</a>
         </div>
     </div>
 
 </div>
 
-<footer style="padding: 50px; text-align: center; opacity: 0.5;">
+<footer>
     &copy; 2024 CS Market. Все права защищены.
 </footer>
 
