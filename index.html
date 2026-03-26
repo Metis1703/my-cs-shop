@@ -2,41 +2,72 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Бесплатный Маркет CS 1.6</title>
+    <title>CS 1.6 Premium Store</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
-        body { background: #0f0f0f; color: #eee; font-family: 'Tahoma', sans-serif; margin: 0; text-align: center; }
-        .header { background: #222; padding: 50px; border-bottom: 2px solid #00ff00; }
-        .header h1 { color: #00ff00; margin: 0; text-transform: uppercase; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; }
-        .product { background: #1a1a1a; border: 1px solid #333; margin: 15px; width: 280px; padding: 20px; border-radius: 10px; transition: 0.3s; }
-        .product:hover { border-color: #00ff00; transform: scale(1.03); }
-        .product img { width: 100%; border-radius: 5px; margin-bottom: 15px; }
-        .price { font-size: 24px; color: #00ff00; font-weight: bold; margin: 15px 0; }
-        .buy-btn { background: #00ff00; color: #000; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; display: block; }
+        :root { --primary: #00ff41; --accent: #ff9d00; --bg: #0b0e11; }
+        body { background: var(--bg); color: #fff; font-family: 'Roboto', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* Фон с эффектом сетки */
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0.8), rgba(18, 16, 16, 0.8)), url('https://www.transparenttextures.com'); z-index: -1; }
+
+        header { padding: 80px 20px; text-align: center; background: radial-gradient(circle, rgba(0,255,65,0.1) 0%, rgba(0,0,0,0) 70%); }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; text-transform: uppercase; margin: 0; letter-spacing: 5px; text-shadow: 0 0 20px var(--primary); }
+        h1 span { color: var(--primary); }
+
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: -50px auto 50px; padding: 0 20px; }
+
+        /* Карточка товара */
+        .item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px); transition: 0.4s; position: relative; overflow: hidden; }
+        .item:hover { border-color: var(--primary); transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0, 255, 65, 0.2); }
+        
+        .badge { position: absolute; top: 10px; right: 10px; background: var(--primary); color: #000; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+
+        .item img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; filter: grayscale(30%); transition: 0.3s; }
+        .item:hover img { filter: grayscale(0%); }
+
+        h3 { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; margin: 10px 0; color: #fff; }
+        p { color: #aaa; font-size: 0.9rem; line-height: 1.5; height: 45px; overflow: hidden; }
+
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .price { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+
+        .buy-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
+        .buy-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>CS 1.6 FREE MARKET</h1>
-        <p>Плагины / Модели / Готовые сервера</p>
-    </div>
-    <div class="container">
-        <!-- ТОВАР 1 -->
-        <div class="product">
-            <img src="https://placehold.co" alt="Plugin">
-            <h3>Супер Админ Меню</h3>
-            <p>Гибкая настройка прав и оружия.</p>
-            <div class="price">Бесплатно</div>
-            <a href="https://t.me" class="buy-btn">СКАЧАТЬ / КУПИТЬ</a>
-        </div>
-        <!-- ТОВАР 2 -->
-        <div class="product">
-            <img src="https://placehold.co" alt="Model">
-            <h3>Скин Террориста HD</h3>
-            <p>Высокая детализация, без лагов.</p>
-            <div class="price">100 руб.</div>
-            <a href="https://t.me" class="buy-btn">СВЯЗАТЬСЯ</a>
+
+<header>
+    <h1>CS 1.6 <span>STORE</span></h1>
+    <p>Premium Plugins & Models for your server</p>
+</header>
+
+<div class="container">
+    <!-- Товар 1 -->
+    <div class="item">
+        <span class="badge">Plugin</span>
+        <img src="https://i.ytimg.com" alt="Vip Menu">
+        <h3>VIP System Gold</h3>
+        <p>Золотое оружие, двойные прыжки и регенерация HP.</p>
+        <div class="price-row">
+            <div class="price">450 ₽</div>
+            <a href="https://t.me" class="buy-btn">Купить</a>
         </div>
     </div>
+
+    <!-- Товар 2 -->
+    <div class="item">
+        <span class="badge">Model</span>
+        <img src="https://all-cs.ru" alt="Skins">
+        <h3>Admin Pack Skins</h3>
+        <p>Набор уникальных скинов для администраторов (T/CT).</p>
+        <div class="price-row">
+            <div class="price">290 ₽</div>
+            <a href="https://t.me" class="buy-btn">Купить</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
