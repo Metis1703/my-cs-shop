@@ -3,101 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 MARKET — Плагины и Модели</title>
+    <title>CS-MARKET | Магазин плагинов и моделей</title>
     <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
-        :root { --primary: #00ff41; --accent: #ff9d00; --dark: #0a0a0a; --card: #151515; }
-        body { background: var(--dark); color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; }
+        :root { --main: #ff9d00; --bg: #0d1117; --card: #161b22; --text: #c9d1d9; }
+        body { background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; }
         
-        /* Сетка на фоне */
-        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px); background-size: 30px 30px; z-index: -1; opacity: 0.3; }
-
-        header { padding: 100px 20px; text-align: center; background: radial-gradient(circle at center, rgba(0, 255, 65, 0.15) 0%, transparent 70%); }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 8vw, 4rem); margin: 0; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0 0 30px var(--primary); }
-        h1 span { color: var(--primary); }
-        header p { opacity: 0.6; font-size: 1.2rem; margin-top: 10px; }
-
-        .container { max-width: 1200px; margin: -60px auto 100px; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
-
-        .card { background: var(--card); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
-        .card:hover { transform: translateY(-15px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0, 255, 65, 0.2); }
-
-        .card-img { width: 100%; height: 200px; background-size: cover; background-position: center; position: relative; }
-        .card-img::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(transparent, var(--card)); }
+        /* Шапка */
+        header { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://img.freepik.com'); background-size: cover; padding: 100px 20px; text-align: center; border-bottom: 2px solid var(--main); }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 3rem; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 4px; }
+        h1 span { color: var(--main); text-shadow: 0 0 15px var(--main); }
         
-        .badge { position: absolute; top: 15px; left: 15px; background: var(--primary); color: #000; padding: 4px 12px; border-radius: 50px; font-weight: 900; font-size: 10px; text-transform: uppercase; z-index: 2; }
+        /* Сетка товаров */
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        
+        /* Карточка товара */
+        .item { background: var(--card); border-radius: 12px; border: 1px solid #30363d; overflow: hidden; transition: 0.3s; position: relative; }
+        .item:hover { transform: translateY(-10px); border-color: var(--main); box-shadow: 0 10px 30px rgba(255, 157, 0, 0.2); }
+        
+        .type { position: absolute; top: 10px; left: 10px; background: var(--main); color: #000; padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 10px; text-transform: uppercase; }
+        .img-box { height: 180px; background: #21262d; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        
+        .info { padding: 20px; }
+        .info h3 { margin: 0 0 10px; font-size: 1.2rem; color: #fff; }
+        .info p { font-size: 0.9rem; color: #8b949e; line-height: 1.5; margin-bottom: 20px; height: 40px; overflow: hidden; }
+        
+        .price-line { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #30363d; padding-top: 15px; }
+        .price { font-size: 1.5rem; font-weight: 800; color: #fff; }
+        .price span { font-size: 0.9rem; color: var(--main); }
+        
+        .buy { background: var(--main); color: #000; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: 800; font-size: 0.9rem; transition: 0.2s; }
+        .buy:hover { background: #fff; }
 
-        .content { padding: 25px; }
-        h3 { font-family: 'Orbitron', sans-serif; margin: 0 0 10px; font-size: 1.4rem; color: #fff; }
-        p { color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px; height: 45px; overflow: hidden; }
-
-        .footer-card { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px; }
-        .price { font-size: 1.8rem; font-weight: 900; color: #fff; font-family: 'Orbitron', sans-serif; }
-        .price span { font-size: 1rem; color: var(--primary); }
-
-        .btn { background: var(--primary); color: #000; text-decoration: none; padding: 12px 25px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { background: #fff; box-shadow: 0 0 20px #fff; }
-
-        /* Иконка ТГ внизу */
-        .tg-float { position: fixed; bottom: 30px; right: 30px; background: #24A1DE; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.3s; }
-        .tg-float:hover { transform: scale(1.1) rotate(10deg); }
+        /* Футер */
+        footer { text-align: center; padding: 40px; border-top: 1px solid #30363d; margin-top: 50px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>CS 1.6 <span>MARKET</span></h1>
-    <p>Топовые скрипты и уникальный визуал для твоего сервера</p>
+    <h1>CS <span>MARKET</span></h1>
+    <p>Уникальные плагины и модели для твоего сервера 1.6</p>
 </header>
 
 <div class="container">
+    
     <!-- ТОВАР 1 -->
-    <div class="card">
-        <div class="badge">Plugin</div>
-        <div class="card-img" style="background-image: url('https://gamebanana.com');"></div>
-        <div class="content">
-            <h3>Ultimate VIP Gold</h3>
-            <p>Золотой набор оружия, меню выбора способностей и эффекты при убийстве.</p>
-            <div class="footer-card">
-                <div class="price">490 <span>₽</span></div>
-                <a href="https://t.me" class="btn">Купить</a>
+    <div class="item">
+        <div class="type">Плагин</div>
+        <div class="img-box">⚙️</div>
+        <div class="info">
+            <h3>VIP System [GOLD]</h3>
+            <p>Золотое оружие, вампиризм и уникальное меню.</p>
+            <div class="price-line">
+                <div class="price">350 <span>₽</span></div>
+                <a href="https://t.me" class="buy">КУПИТЬ</a>
             </div>
         </div>
     </div>
 
     <!-- ТОВАР 2 -->
-    <div class="card">
-        <div class="badge">Model</div>
-        <div class="card-img" style="background-image: url('https://gamebanana.com');"></div>
-        <div class="content">
-            <h3>Admin Skull Pack</h3>
-            <p>Уникальные модели администраторов с татуировками и светящимися глазами.</p>
-            <div class="footer-card">
-                <div class="price">250 <span>₽</span></div>
-                <a href="https://t.me" class="btn">Купить</a>
+    <div class="item">
+        <div class="type">Модель</div>
+        <div class="img-box">👤</div>
+        <div class="info">
+            <h3>Admin Skin Pack</h3>
+            <p>Набор эксклюзивных скинов для администрации.</p>
+            <div class="price-line">
+                <div class="price">200 <span>₽</span></div>
+                <a href="https://t.me" class="buy">КУПИТЬ</a>
             </div>
         </div>
     </div>
 
     <!-- ТОВАР 3 -->
-    <div class="card">
-        <div class="badge">Server</div>
-        <div class="card-img" style="background-image: url('https://gamebanana.com');"></div>
-        <div class="content">
-            <h3>Classic Public Ready</h3>
-            <p>Полностью настроенная сборка сервера: быстрая загрузка, защита от взлома.</p>
-            <div class="footer-card">
-                <div class="price">800 <span>₽</span></div>
-                <a href="https://t.me" class="btn">Купить</a>
+    <div class="item">
+        <div class="type">Сборка</div>
+        <div class="img-box">📦</div>
+        <div class="info">
+            <h3>Public Server 2024</h3>
+            <p>Готовый сервер со всеми защитами и быстрой загрузкой.</p>
+            <div class="price-line">
+                <div class="price">900 <span>₽</span></div>
+                <a href="https://t.me" class="buy">КУПИТЬ</a>
             </div>
         </div>
     </div>
+
 </div>
 
-<a href="https://t.me" class="tg-float" title="Написать мне">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.64 8.8C16.49 10.38 15.84 14.18 15.51 15.96C15.37 16.71 15.09 16.96 14.83 16.99C14.25 17.04 13.81 16.61 13.25 16.24C12.37 15.66 11.87 15.31 11.02 14.75C10.03 14.1 10.67 13.74 11.23 13.15C11.38 13 13.92 10.69 13.97 10.48C13.98 10.45 13.99 10.35 13.92 10.3C13.86 10.24 13.77 10.26 13.71 10.28C13.61 10.3 12.11 11.3 9.21 13.26C8.78 13.55 8.39 13.69 8.05 13.68C7.67 13.67 6.94 13.47 6.4 13.29C5.73 13.08 5.2 12.97 5.25 12.6C5.27 12.41 5.53 12.21 6.03 12.01C9.13 10.66 11.21 9.77 12.26 9.33C15.26 8.08 15.89 7.86 16.3 7.86C16.39 7.86 16.59 7.88 16.73 8C16.85 8.09 16.89 8.22 16.91 8.32C16.92 8.41 16.94 8.62 16.64 8.8Z" fill="white"/></svg>
-</a>
+<footer>
+    &copy; 2024 CS-MARKET. Все права защищены.
+</footer>
 
 </body>
 </html>
+
