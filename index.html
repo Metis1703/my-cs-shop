@@ -20,7 +20,7 @@
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
         
-        input { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
         
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: #0a0a0a; padding: 35px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 320px; text-align: center; }
@@ -64,8 +64,11 @@
         <div id="page-main">
             <div class="card">
                 <h3>⚙️ ЛИЧНЫЕ ДАННЫЕ</h3>
-                <input type="text" id="u-ava-input" placeholder="Ссылка на аватарку (URL)">
-                <button class="nav-btn" onclick="updateAva()">СОХРАНИТЬ</button>
+                <input type="text" id="u-ava-input" placeholder="URL аватарки">
+                <button class="nav-btn" onclick="updateAva()">СОХРАНИТЬ АВАТАР</button>
+                <hr style="border:0; border-top:1px solid #222; margin:15px 0">
+                <input type="text" id="promo-input" placeholder="ВВЕДИТЕ ПРОМОКОД">
+                <button class="nav-btn" style="border-color:var(--neon-gold); color:var(--neon-gold)" onclick="activatePromo()">АКТИВИРОВАТЬ</button>
             </div>
             <div class="card"><h3>🎒 ИНВЕНТАРЬ</h3><div id="u-inv" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px"></div></div>
         </div>
@@ -77,33 +80,49 @@
             <div id="chat-private" class="card" style="display:none">
                 <h3 id="chat-with-name">ЧАТ</h3>
                 <div id="private-msgs" style="height:250px; overflow-y:auto; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.3)"></div>
-                <div style="display:flex; gap:5px"><input type="text" id="p-msg-input" placeholder="Напишите..."><button class="nav-btn" onclick="sendPrivateMsg()">SEND</button></div>
+                <div style="display:flex; gap:5px"><input type="text" id="p-msg-input" placeholder="Сообщение..."><button class="nav-btn" onclick="sendPrivateMsg()">SEND</button></div>
             </div>
         </div>
 
         <div id="page-admin" style="display:none">
-            <div class="card"><h3>📦 ДОБАВИТЬ ТОВАР</h3><input id="adm-n" placeholder="Название"><input id="adm-p" type="number" placeholder="Цена"><input id="adm-img" placeholder="URL фото"><input id="adm-link" placeholder="URL файла"><button class="nav-btn" style="width:100%" onclick="createItem()">ВЫСТАВИТЬ</button></div>
+            <div class="card">
+                <h3>📦 МАРКЕТ</h3>
+                <input id="adm-n" placeholder="Название товара">
+                <input id="adm-p" type="number" placeholder="Цена">
+                <input id="adm-img" placeholder="URL фото">
+                <input id="adm-link" placeholder="URL файла">
+                <button class="nav-btn" style="width:100%" onclick="createItem()">ВЫСТАВИТЬ</button>
+            </div>
+            <div class="card">
+                <h3>🎁 ПРОМОКОДЫ</h3>
+                <input id="adm-promo-name" placeholder="КОД (напр. METIS2024)">
+                <input id="adm-promo-val" type="number" placeholder="СУММА (₽)">
+                <button class="nav-btn" style="width:100%; border-color:var(--neon-gold); color:var(--neon-gold)" onclick="createPromo()">СОЗДАТЬ ПРОМО</button>
+            </div>
+            <div class="card">
+                <h3>🗑️ СЕРВИС</h3>
+                <button class="nav-btn" style="width:100%; border-color:red; color:red" onclick="clearChat()">ОЧИСТИТЬ ОБЩИЙ ЧАТ</button>
+            </div>
             <div class="card"><h3>📊 ПРОДАЖИ</h3><div id="adm-sales" style="font-size:11px"></div></div>
         </div>
     </div>
-
     <div class="sidebar"><div class="card"><h4>💬 ОБЩИЙ ЧАТ</h4><div id="chat" style="height:400px; overflow-y:auto; font-size:12px; margin-bottom:10px"></div><input type="text" id="chat-in" placeholder="Сказать..." onkeypress="if(event.key==='Enter') sendMsg()"></div></div>
 </div>
 
 <script>
     const MY_LOGIN = "Metis"; const MY_PASS = "1703";
-    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V7')) || { users: {}, msgs: [], market: [], sales: [], pvt: {}, lastRead: {} };
+    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V10')) || { users: {}, msgs: [], market: [], sales: [], pvt: {}, lastRead: {}, promos: {} };
     let user = localStorage.getItem('active_user');
     let currentChatPartner = null;
     const beep = new Audio('https://assets.mixkit.co');
 
-    function save() { localStorage.setItem('CYBER_DATA_V7', JSON.stringify(db)); }
+    function save() { localStorage.setItem('CYBER_DATA_V10', JSON.stringify(db)); }
 
     function auth() {
         const l = document.getElementById('u-login').value.trim(), p = document.getElementById('u-pass').value;
         if(!l || !p) return;
-        if(l === MY_LOGIN && p !== MY_PASS) return alert("ОШИБКА ДОСТУПА");
-        if(!db.users[l]) db.users[l] = { pass: btoa(p), bal: 1000, inv: [], lastSeen: Date.now(), ava: "" };
+        if(l === MY_LOGIN && p !== MY_PASS) return alert("ОШИБКА!");
+        if(!db.users[l]) db.users[l] = { pass: btoa(p), bal: 1000, inv: [], lastSeen: Date.now(), ava: "", usedPromos: [] };
         user = l; localStorage.setItem('active_user', l); save(); location.reload();
     }
 
@@ -125,6 +144,68 @@
         if(user === MY_LOGIN) document.getElementById('h-badge').innerHTML = '<span class="badge">OWNER</span>';
         renderInv(); renderMarket(); renderChat(); renderFriends();
         if(user === MY_LOGIN) renderSales();
+    }
+
+    // --- СИСТЕМА ПРОМОКОДОВ ---
+    function createPromo() {
+        const name = document.getElementById('adm-promo-name').value.trim().toUpperCase();
+        const val = parseInt(document.getElementById('adm-promo-val').value);
+        if(!name || !val) return alert("Заполните данные промокода!");
+        db.promos[name] = val;
+        save(); alert(`Промокод ${name} на ${val}₽ создан!`);
+        document.getElementById('adm-promo-name').value = ""; document.getElementById('adm-promo-val').value = "";
+    }
+
+    function activatePromo() {
+        const code = document.getElementById('promo-input').value.trim().toUpperCase();
+        const u = db.users[user];
+        if(!db.promos[code]) return alert("Такого промокода не существует!");
+        if(!u.usedPromos) u.usedPromos = []; // фикс для старых акков
+        if(u.usedPromos.includes(code)) return alert("Вы уже активировали этот код!");
+        
+        u.bal += db.promos[code];
+        u.usedPromos.push(code);
+        save(); init();
+        alert(`Успех! Баланс пополнен на ${db.promos[code]}₽`);
+        document.getElementById('promo-input').value = "";
+    }
+
+    // --- ОСТАЛЬНОЕ ---
+    function buyItem(id) {
+        const it = db.market.find(x => x.id == id);
+        if(!it) return;
+        if(db.users[user].bal < it.p) return alert("НЕДОСТАТОЧНО СРЕДСТВ");
+        db.users[user].bal -= it.p;
+        db.users[user].inv.push({...it, buyDate: Date.now()}); 
+        db.sales.push({ buyer: user, item: it.n, price: it.p, date: new Date().toLocaleString() });
+        db.msgs.push({ u: 'SYSTEM', t: `🛒 ${user} приобрёл ${it.n}`, isSystem: true, d: Date.now() });
+        save(); init(); alert("Товар в инвентаре!");
+    }
+
+    function removeItem(id) {
+        if(user !== MY_LOGIN) return;
+        db.market = db.market.filter(m => m.id !== id);
+        save(); renderMarket();
+    }
+
+    function clearChat() {
+        if(user !== MY_LOGIN || !confirm("Очистить чат?")) return;
+        db.msgs = []; save(); renderChat();
+    }
+
+    function renderMarket() {
+        document.getElementById('m-list').innerHTML = db.market.map(m => `
+            <div class="card" style="text-align:center; padding:10px; position:relative">
+                ${user === MY_LOGIN ? `<button onclick="removeItem(${m.id})" style="position:absolute; top:5px; right:5px; background:red; color:white; border:none; border-radius:4px; font-size:8px">X</button>` : ''}
+                <img src="${m.img || 'https://via.placeholder.com'}" style="width:100%; height:80px; object-fit:cover; border-radius:5px">
+                <div style="font-size:11px; margin:5px 0"><b>${m.n}</b></div>
+                <button class="nav-btn" style="width:100%" onclick="buyItem(${m.id})">${m.p} ₽</button>
+            </div>
+        `).join('');
+    }
+
+    function renderInv() {
+        document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `<div class="card" style="padding:10px; font-size:10px"><b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a></div>`).join('') || "Пусто";
     }
 
     function updateAva() {
@@ -185,36 +266,8 @@
 
     function renderPrivateMsgs() {
         const key = [user, currentChatPartner].sort().join('_');
-        document.getElementById('private-msgs').innerHTML = (db.pvt[key] || []).map(m => `
-            <div class="msg-box ${m.f === user ? 'msg-out' : 'msg-in'}">
-                <img src="${db.users[m.f].ava || 'https://via.placeholder.com'}" class="ava-circle" style="width:25px; height:25px">
-                <div><b>${m.f}:</b><br>${m.t}</div>
-            </div>
-        `).join('');
+        document.getElementById('private-msgs').innerHTML = (db.pvt[key] || []).map(m => `<div class="msg-box ${m.f === user ? 'msg-out' : 'msg-in'}"><img src="${db.users[m.f].ava || 'https://via.placeholder.com'}" class="ava-circle" style="width:25px; height:25px"><div><b>${m.f}:</b><br>${m.t}</div></div>`).join('');
         document.getElementById('private-msgs').scrollTop = 9999;
-    }
-
-    function buyItem(id) {
-        const it = db.market.find(x => x.id == id);
-        if(db.users[user].bal < it.p) return alert("НЕДОСТАТОЧНО СРЕДСТВ");
-        db.users[user].bal -= it.p; db.users[user].inv.push(it);
-        db.sales.push({ buyer: user, item: it.n, price: it.p, date: new Date().toLocaleString() });
-        db.msgs.push({ u: 'SYSTEM', t: `🛒 ${user} выкупил ${it.n}`, d: Date.now() });
-        save(); init();
-    }
-
-    function renderMarket() {
-        document.getElementById('m-list').innerHTML = db.market.map(m => `
-            <div class="card" style="text-align:center; padding:10px">
-                <img src="${m.img || 'https://via.placeholder.com'}" style="width:100%; height:80px; object-fit:cover; border-radius:5px">
-                <div style="font-size:11px; margin:5px 0"><b>${m.n}</b></div>
-                <button class="nav-btn" style="width:100%" onclick="buyItem(${m.id})">${m.p} ₽</button>
-            </div>
-        `).join('');
-    }
-
-    function renderInv() {
-        document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `<div class="card" style="padding:10px; font-size:10px"><b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a></div>`).join('') || "Пусто";
     }
 
     function sendMsg() {
@@ -225,12 +278,7 @@
     }
 
     function renderChat() {
-        document.getElementById('chat').innerHTML = db.msgs.map(m => `
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
-                <img src="${m.a || (db.users[m.u] ? db.users[m.u].ava : 'https://via.placeholder.com')}" class="ava-circle" style="width:25px; height:25px">
-                <div style="font-size:11px"><b style="color:var(--neon-blue)">${m.u}:</b> ${m.t}</div>
-            </div>
-        `).join('');
+        document.getElementById('chat').innerHTML = db.msgs.map(m => `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px"><img src="${m.a || (db.users[m.u] ? db.users[m.u].ava : 'https://via.placeholder.com')}" class="ava-circle" style="width:25px; height:25px"><div style="font-size:11px"><b style="color:${m.u===MY_LOGIN?'var(--neon-gold)':'var(--neon-blue)'}">${m.u}:</b> ${m.t}</div></div>`).join('');
     }
 
     function updateOnline() {
