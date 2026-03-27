@@ -3,833 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 Market | Магазин плагинов</title>
+    <title>Магазин привилегий CS-RAGE</title>
     <style>
-        :root { --main: #ff9d00; --bg: #0b0e11; --card: #161b22; --text: #c9d1d9; --green: #00ff41; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding-top: 60px; }
-        
-        /* Навигация */
-        nav { background: #000; padding: 15px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 2px solid var(--main); display: flex; justify-content: center; gap: 20px; box-sizing: border-box; }
-        nav a { color: #fff; text-decoration: none; font-weight: bold; font-size: 13px; text-transform: uppercase; cursor: pointer; }
-
-        .container { max-width: 1000px; margin: auto; padding: 20px; text-align: center; }
-
-        /* Личный кабинет */
-        .profile-box { background: var(--card); border: 2px solid var(--main); padding: 25px; border-radius: 15px; margin-bottom: 40px; box-shadow: 0 0 20px rgba(255, 157, 0, 0.1); }
-        .hidden { display: none; }
-        input { padding: 10px; margin: 5px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; width: 200px; }
-        
-        /* Кнопки */
-        .btn { background: var(--main); color: #000; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; transition: 0.3s; text-decoration: none; display: inline-block; }
-        .btn:hover { background: #fff; transform: scale(1.05); }
-        .btn-pay { background: var(--green); margin-top: 15px; }
-
-        /* Товары */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background: var(--card); border: 1px solid #333; padding: 25px; border-radius: 12px; }
-        .price { font-size: 24px; color: #fff; font-weight: bold; margin: 15px 0; }
-
-        .history { background: #000; border-radius: 10px; padding: 15px; margin-top: 20px; text-align: left; border: 1px solid #333; }
-    </style>
-</head>
-<body>
-
-<nav>
-    <a onclick="location.reload()">Главная</a>
-    <a href="#shop">Магазин</a>
-    <a href="https://t.me">Поддержка</a>
-</nav>
-
-<div class="container">
-    <h1>CS <span style="color:var(--main)">MARKET</span></h1>
-
-    <!-- БЛОК ВХОДА / КАБИНЕТА -->
-    <div id="auth-block" class="profile-box">
-        <div id="login-form">
-            <h3>🔐 Вход / Регистрация</h3>
-            <input type="text" id="username" placeholder="Логин">
-            <input type="password" id="password" placeholder="Пароль">
-            <br><br>
-            <button class="btn" onclick="login()">Войти в кабинет</button>
-            <p style="font-size: 11px; opacity: 0.5;">*Введите <b>admin</b> чтобы получить 50,000 ₽</p>
-        </div>
-
-        <div id="user-profile" class="hidden">
-            <h3>👤 Привет, <span id="display-name" style="color:var(--main)"></span>!</h3>
-            <div style="font-size: 24px;">Баланс: <b id="user-balance" style="color:var(--green)">0</b> ₽</div>
-            
-            <!-- КНОПКА ОПЛАТЫ (Замени цифры на свой кошелек ЮMoney или ссылку на карту) -->
-            <a href="https://yoomoney.ru" target="_blank" class="btn btn-pay">💳 ПОПОЛНИТЬ БАЛАНС</a>
-            
-            <div class="history">
-                <h4 style="margin:0; color:var(--main);">📜 Ваши покупки:</h4>
-                <div id="history-list"><p style="color:#666">Покупок нет</p></div>
-            </div>
-            <br>
-            <button onclick="logout()" style="background:none; border:none; color:#666; cursor:pointer; text-decoration:underline;">Выйти</button>
-        </div>
-    </div>
-
-    <!-- МАГАЗИН -->
-    <h2 id="shop">ВИТРИНА ТОВАРОВ</h2>
-    <div class="grid">
-        <div class="card">
-            <h3>VIP Gold Menu</h3>
-            <p>Плагин на золотое оружие</p>
-            <div class="price">250 ₽</div>
-            <button class="btn" onclick="buy('VIP Gold Menu', 250, 'ССЫЛКА_НА_ФАЙЛ_1')">Купить</button>
-        </div>
-        <div class="card">
-            <h3>Admin Skins</h3>
-            <p>Набор моделей администратора</p>
-            <div class="price">150 ₽</div>
-            <button class="btn" onclick="buy('Admin Skins', 150, 'ССЫЛКА_НА_ФАЙЛ_2')">Купить</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Логика работы кабинета (LocalStorage)
-    function login() {
-        const name = document.getElementById('username').value.trim();
-        if(name.length < 2) return alert("Введите логин!");
-        localStorage.setItem('cs_user', name);
-        if(name.toLowerCase() === 'admin') {
-            localStorage.setItem('cs_balance', "50000");
-        } else if (!localStorage.getItem('cs_balance')) {
-            localStorage.setItem('cs_balance', "0");
-        }
-        updateUI();
-    }
-
-    function logout() {
-        localStorage.removeItem('cs_user');
-        location.reload();
-    }
-
-    function buy(name, price, link) {
-        const user = localStorage.getItem('cs_user');
-        if(!user) return alert("Сначала войдите в кабинет!");
-        let bal = parseFloat(localStorage.getItem('cs_balance') || "0");
-        let hist = JSON.parse(localStorage.getItem('cs_history') || "[]");
-        
-        if(hist.includes(name)) return alert("Уже куплено!");
-        if(bal < price) return alert("Недостаточно денег! Пополните баланс кнопкой выше.");
-
-        bal -= price;
-        hist.push(name);
-        localStorage.setItem('cs_balance', bal);
-        localStorage.setItem('cs_history', JSON.stringify(hist));
-        alert("Успешно! Ссылка в истории покупок.");
-        updateUI();
-    }
-
-    function updateUI() {
-        const user = localStorage.getItem('cs_user');
-        if(user) {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('display-name').innerText = user;
-            document.getElementById('user-balance').innerText = localStorage.getItem('cs_balance');
-            
-            const hist = JSON.parse(localStorage.getItem('cs_history') || "[]");
-            const list = document.getElementById('history-list');
-            if(hist.length > 0) {
-                list.innerHTML = hist.map(i => `<div style="margin:5px 0;">✅ ${i} - <span style="color:var(--green)">Оплачено</span></div>`).join('');
-            }
-        }
-    }
-    updateUI();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 Market | Ежедневный Кейс</title>
-    <style>
-        :root { --main: #ff9d00; --bg: #0b0e11; --card: #161b22; --green: #00ff41; --gold: #ffd700; }
-        body { background: var(--bg); color: #c9d1d9; font-family: 'Segoe UI', sans-serif; margin: 0; padding-top: 60px; text-align: center; }
-        nav { background: #000; padding: 15px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 2px solid var(--main); display: flex; justify-content: center; gap: 20px; }
-        nav a { color: #fff; text-decoration: none; font-weight: bold; font-size: 13px; text-transform: uppercase; cursor: pointer; }
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-        .box { background: var(--card); border: 1px solid #333; padding: 25px; border-radius: 15px; margin-bottom: 30px; }
-        
-        /* КЕЙС */
-        .case-box { border: 2px solid var(--green); box-shadow: 0 0 15px rgba(0, 255, 65, 0.1); }
-        .case-anim { font-size: 45px; font-weight: bold; color: var(--green); margin: 20px 0; height: 60px; }
-        .timer-text { font-size: 14px; color: #ff4444; margin-top: 10px; }
-
-        .btn { background: var(--main); color: #000; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; transition: 0.3s; }
-        .btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; }
-        .btn-free { background: var(--green); color: #000; box-shadow: 0 0 15px rgba(0, 255, 65, 0.3); }
-        
-        .hidden { display: none; }
-        input { padding: 10px; margin: 5px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; }
-    </style>
-</head>
-<body>
-
-<nav>
-    <a onclick="location.reload()">Главная</a>
-    <a href="#daily-case">Бесплатный кейс</a>
-    <a href="https://t.me">Поддержка</a>
-</nav>
-
-<div class="container">
-    <h1>CS <span style="color:var(--main)">MARKET</span></h1>
-
-    <!-- КАБИНЕТ -->
-    <div class="box">
-        <div id="login-form">
-            <h3>🔐 Вход в маркет</h3>
-            <input type="text" id="username" placeholder="Твой Ник">
-            <button class="btn" onclick="login()">Войти</button>
-        </div>
-        <div id="user-profile" class="hidden">
-            <h3>👤 Привет, <span id="display-name" style="color:var(--main)"></span>!</h3>
-            <div style="font-size: 24px;">Твой баланс: <b id="user-balance" style="color:var(--green)">0</b> ₽</div>
-            <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:#666; cursor:pointer; text-decoration:underline; font-size:12px;">Выйти</button>
-        </div>
-    </div>
-
-    <!-- ЕЖЕДНЕВНЫЙ КЕЙС -->
-    <div id="daily-case" class="box case-box">
-        <h2 style="color:var(--green); margin:0;">🎁 ЕЖЕДНЕВНЫЙ БОНУС</h2>
-        <p>Крути бесплатно раз в 24 часа и получай деньги на счет!</p>
-        
-        <div id="case-res" class="case-anim">🍀</div>
-        
-        <button id="spin-btn" class="btn btn-free" onclick="spinDaily()">ПОЛУЧИТЬ БОНУС</button>
-        <div id="timer" class="timer-text"></div>
-    </div>
-
-</div>
-
-<script>
-    function login() {
-        const name = document.getElementById('username').value.trim();
-        if(name.length < 2) return alert("Введите ник!");
-        localStorage.setItem('cs_user', name);
-        if(!localStorage.getItem('cs_balance')) localStorage.setItem('cs_balance', 0);
-        updateUI();
-    }
-
-    function spinDaily() {
-        const user = localStorage.getItem('cs_user');
-        if(!user) return alert("Сначала войди в аккаунт!");
-
-        const lastSpin = localStorage.getItem('last_spin_' + user);
-        const now = Date.now();
-
-        // Проверка времени (24 часа = 86400000 миллисекунд)
-        if (lastSpin && (now - lastSpin < 86400000)) {
-            return alert("Кейс будет доступен через " + getWaitTime(lastSpin));
-        }
-
-        const btn = document.getElementById('spin-btn');
-        const res = document.getElementById('case-res');
-        btn.disabled = true;
-
-        // Анимация рандома
-        let count = 0;
-        let interval = setInterval(() => {
-            res.innerText = Math.floor(Math.random() * 100) + " ₽";
-            count++;
-            if(count > 15) {
-                clearInterval(interval);
-                finalizeSpin(user, now);
-            }
-        }, 100);
-    }
-
-    function finalizeSpin(user, now) {
-        const res = document.getElementById('case-res');
-        const prizes = [5, 10, 15, 20, 30, 50, 75, 100]; // Возможные призы
-        const win = prizes[Math.floor(Math.random() * prizes.length)];
-        
-        res.innerText = win + " ₽";
-        
-        // Начисляем деньги
-        let bal = parseFloat(localStorage.getItem('cs_balance'));
-        bal += win;
-        localStorage.setItem('cs_balance', bal);
-        
-        // Сохраняем время прокрута
-        localStorage.setItem('last_spin_' + user, now);
-        
-        alert("Поздравляем! Ты выиграл " + win + " ₽ на свой баланс!");
-        updateUI();
-    }
-
-    function getWaitTime(lastSpin) {
-        const remaining = 86400000 - (Date.now() - lastSpin);
-        const hours = Math.floor(remaining / 3600000);
-        const mins = Math.floor((remaining % 3600000) / 60000);
-        return hours + "ч. " + mins + "м.";
-    }
-
-    function updateUI() {
-        const user = localStorage.getItem('cs_user');
-        const btn = document.getElementById('spin-btn');
-        const timerDiv = document.getElementById('timer');
-
-        if(user) {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('display-name').innerText = user;
-            document.getElementById('user-balance').innerText = localStorage.getItem('cs_balance');
-
-            // Проверяем таймер для кнопки
-            const lastSpin = localStorage.getItem('last_spin_' + user);
-            if (lastSpin && (Date.now() - lastSpin < 86400000)) {
-                btn.disabled = true;
-                btn.innerText = "УЖЕ ПОЛУЧЕНО";
-                timerDiv.innerText = "Следующий бонус через: " + getWaitTime(lastSpin);
-            } else {
-                btn.disabled = false;
-                btn.innerText = "ПОЛУЧИТЬ БОНУС";
-                timerDiv.innerText = "";
-            }
-        }
-    }
-
-    // Обновлять таймер каждую минуту
-    setInterval(updateUI, 60000);
-    updateUI();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 Market | Live-Лента</title>
-    <style>
-        :root { --main: #ff9d00; --bg: #0b0e11; --card: #161b22; --green: #00ff41; --blue: #0084ff; }
-        body { background: var(--bg); color: #c9d1d9; font-family: 'Segoe UI', sans-serif; margin: 0; padding-top: 60px; text-align: center; }
-        nav { background: #000; padding: 15px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 2px solid var(--main); display: flex; justify-content: center; gap: 20px; }
-        nav a { color: #fff; text-decoration: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-        .box { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        
-        input { display: block; width: 85%; margin: 10px auto; padding: 12px; border-radius: 5px; background: #000; color: #fff; border: 1px solid #444; }
-        .btn { background: var(--main); color: #000; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; width: 90%; transition: 0.3s; }
-        .btn:hover { background: #fff; }
-        .hidden { display: none; }
-
-        /* ЛЕНТА СОБЫТИЙ */
-        .live-feed { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .feed-box { background: #000; border: 1px solid #222; border-radius: 10px; padding: 10px; height: 150px; overflow: hidden; font-size: 13px; text-align: left; }
-        .feed-title { color: var(--main); font-size: 11px; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #111; padding-bottom: 5px; display: block; }
-        .feed-item { margin-bottom: 5px; animation: fadeIn 0.5s ease; border-left: 2px solid var(--main); padding-left: 8px; }
-        .win { color: var(--green); }
-        .buy { color: var(--blue); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-
-<nav>
-    <a onclick="location.reload()">Главная</a>
-    <a href="#case">Кейс</a>
-    <a href="#shop">Магазин</a>
-</nav>
-
-<div class="container">
-    <h1>CS <span style="color:var(--main)">MARKET</span></h1>
-
-    <!-- LIVE ЛЕНТА -->
-    <div class="live-feed">
-        <div class="feed-box">
-            <span class="feed-title">💎 Последние выигрыши</span>
-            <div id="win-feed"></div>
-        </div>
-        <div class="feed-box">
-            <span class="feed-title">🛒 Последние покупки</span>
-            <div id="buy-feed"></div>
-        </div>
-    </div>
-
-    <!-- АВТОРИЗАЦИЯ -->
-    <div id="auth-box" class="box">
-        <div id="reg-form">
-            <h3>🔐 Вход / Регистрация</h3>
-            <input type="text" id="reg-login" placeholder="Логин">
-            <input type="password" id="reg-pass" placeholder="Пароль">
-            <button class="btn" onclick="register()">Войти</button>
-        </div>
-        <div id="user-profile" class="hidden">
-            <h3>👤 Кабинет: <span id="p-login" style="color:var(--main)"></span></h3>
-            <div style="font-size: 20px;">Баланс: <b id="p-balance" style="color:var(--green)">0</b> ₽</div>
-            <button class="btn" style="background:#444; color:#fff; margin-top:10px;" onclick="logout()">Выйти</button>
-        </div>
-    </div>
-
-    <!-- КЕЙС -->
-    <div id="case" class="box" style="border: 2px solid var(--green);">
-        <h3 style="color:var(--green)">🎁 БЕСПЛАТНЫЙ КЕЙС</h3>
-        <div id="case-res" style="font-size: 30px; margin: 15px; font-weight: bold;">?</div>
-        <button id="spin-btn" class="btn" style="background:var(--green)" onclick="spinDaily()">Крутить бесплатно</button>
-    </div>
-
-    <!-- МАГАЗИН -->
-    <div id="shop" class="box">
-        <h3>🛍️ МАГАЗИН ПЛАГИНОВ</h3>
-        <div style="padding: 10px; border: 1px solid #333; margin-bottom: 10px; border-radius: 8px;">
-            <b>VIP System Gold</b> - 250 ₽ 
-            <button onclick="buyItem('VIP Gold', 250)" style="background:var(--main); border:none; padding:5px 10px; border-radius:4px; cursor:pointer; margin-left:10px;">КУПИТЬ</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Инициализация ленты (фейковые данные для начала)
-    let wins = [{n: 'pl***', v: '50'}, {n: 'mi***', v: '10'}];
-    let buys = [{n: 'sk***', v: 'Admin Skin'}, {n: 'le***', v: 'VIP Gold'}];
-
-    function register() {
-        const login = document.getElementById('reg-login').value.trim();
-        const pass = document.getElementById('reg-pass').value.trim();
-        if (!login || !pass) return alert("Заполните поля!");
-        
-        let user = { login, balance: (login === 'admin' ? 50000 : 0) };
-        localStorage.setItem('current_user', JSON.stringify(user));
-        updateUI();
-    }
-
-    function logout() { localStorage.removeItem('current_user'); location.reload(); }
-
-    function spinDaily() {
-        const userStr = localStorage.getItem('current_user');
-        if (!userStr) return alert("Войдите!");
-        let user = JSON.parse(userStr);
-        
-        const win = [5, 10, 20, 50, 100][Math.floor(Math.random() * 5)];
-        user.balance += win;
-        localStorage.setItem('current_user', JSON.stringify(user));
-        
-        // Добавляем в ленту
-        wins.unshift({n: user.login.substring(0,2) + '***', v: win});
-        updateUI();
-        alert(`Выиграно ${win} ₽!`);
-    }
-
-    function buyItem(name, price) {
-        const userStr = localStorage.getItem('current_user');
-        if (!userStr) return alert("Войдите!");
-        let user = JSON.parse(userStr);
-
-        if (user.balance < price) return alert("Мало денег!");
-        user.balance -= price;
-        localStorage.setItem('current_user', JSON.stringify(user));
-        
-        // Добавляем в ленту
-        buys.unshift({n: user.login.substring(0,2) + '***', v: name});
-        updateUI();
-        alert(`Куплено: ${name}`);
-    }
-
-    function updateUI() {
-        const userStr = localStorage.getItem('current_user');
-        if (userStr) {
-            const user = JSON.parse(userStr);
-            document.getElementById('reg-form').classList.add('hidden');
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('p-login').innerText = user.login;
-            document.getElementById('p-balance').innerText = user.balance;
-        }
-
-        // Обновление ленты
-        document.getElementById('win-feed').innerHTML = wins.slice(0, 5).map(i => `<div class="feed-item">${i.n} выиграл <span class="win">${i.v} ₽</span></div>`).join('');
-        document.getElementById('buy-feed').innerHTML = buys.slice(0, 5).map(i => `<div class="feed-item">${i.n} купил <span class="buy">${i.v}</span></div>`).join('');
-    }
-
-    updateUI();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 LUXURY MARKET</title>
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
-    <style>
-        :root { --primary: #00ff41; --accent: #ff9d00; --danger: #ff4141; --glass: rgba(255, 255, 255, 0.05); }
-        
+        /* Общие стили */
         body {
-            background: #050505 url('https://w.forfun.com') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
             margin: 0;
-            backdrop-filter: brightness(0.3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f13;
+            color: #fff;
         }
 
-        /* Эффект стекла для блоков */
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        header {
+            background: #1a1a20;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #e74c3c;
         }
 
-        header { padding: 80px 20px; text-align: center; }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; text-transform: uppercase; letter-spacing: 8px; margin: 0; text-shadow: 0 0 20px var(--primary); }
-        h1 span { color: var(--primary); }
-
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-
-        /* Живая лента без звездочек */
-        .live-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
-        .feed { padding: 15px; height: 120px; overflow: hidden; font-size: 13px; }
-        .feed-item { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); animation: slideIn 0.4s ease; display: flex; justify-content: space-between; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* Разноцветные неоновые кнопки */
-        .btn {
-            padding: 12px 25px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 800;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
-        .btn-green { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
-        .btn-orange { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
-        .btn-blue { background: #0084ff; color: #fff; box-shadow: 0 0 15px #0084ff; }
-        .btn:hover { transform: scale(1.05) translateY(-3px); filter: brightness(1.2); }
 
         /* Сетка товаров */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { padding: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.1); transition: 0.4s; }
-        .card:hover { border-color: var(--primary); background: rgba(255,255,255,0.08); }
-        
-        .price { font-size: 28px; font-weight: 900; margin: 15px 0; color: #fff; }
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
 
-        input { background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 12px; color: #fff; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        .hidden { display: none; }
+        /* Карточка товара */
+        .card {
+            background: #1a1a20;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #2c2c34;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+        }
+
+        .card-header {
+            padding: 20px;
+            background: #25252d;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .price {
+            font-size: 2em;
+            margin: 15px 0;
+            color: #fff;
+        }
+
+        .price span {
+            font-size: 0.5em;
+            color: #888;
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            color: #ccc;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .btn-buy {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-buy:hover {
+            background: #c0392b;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a20;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #25252d;
+            border: 1px solid #3d3d47;
+            color: white;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>CS <span>LUXURY</span></h1>
-    <p style="opacity:0.7">Премиальный маркетплейс скриптов</p>
+    <h1>CS-RAGE SHOP</h1>
+    <p>Выберите привилегию для комфортной игры</p>
 </header>
 
 <div class="container">
-    <!-- Живая лента (Полные ники) -->
-    <div class="live-row">
-        <div class="glass-panel feed">
-            <span style="color:var(--primary); font-size:10px; font-weight:bold;">● ПОСЛЕДНИЕ ВЫИГРЫШИ</span>
-            <div id="win-feed"></div>
-        </div>
-        <div class="glass-panel feed">
-            <span style="color:var(--accent); font-size:10px; font-weight:bold;">● ПОСЛЕДНИЕ ПОКУПКИ</span>
-            <div id="buy-feed"></div>
-        </div>
-    </div>
-
-    <!-- Личный кабинет -->
-    <div id="auth-block" class="glass-panel" style="padding: 40px; margin-bottom: 50px;">
-        <div id="login-form">
-            <h2 style="margin-top:0">ВХОД В СИСТЕМУ</h2>
-            <div style="display:flex; gap:10px; max-width:500px; margin:auto;">
-                <input type="text" id="u-login" placeholder="Введите ваш Ник">
-                <button class="btn btn-green" onclick="login()">ВОЙТИ</button>
+    <div class="shop-grid">
+        
+        <!-- Карточка 1 -->
+        <div class="card">
+            <div class="card-header">VIP STATUS</div>
+            <div class="card-body">
+                <div class="price">150 <span>РУБ/МЕС</span></div>
+                <ul class="features">
+                    <li>Префикс [VIP] в чате</li>
+                    <li>Доступ к эксклюзивным скинам</li>
+                    <li>Резервный слот на сервере</li>
+                    <li>+20% к опыту (XP)</li>
+                </ul>
+                <button class="btn-buy" onclick="openModal('VIP STATUS')">КУПИТЬ</button>
             </div>
         </div>
-        <div id="user-profile" class="hidden">
-            <h2 id="hello-text">ПРИВЕТ, ИГРОК!</h2>
-            <div style="font-size: 32px; font-weight: 900;">БАЛАНС: <span id="u-bal" style="color:var(--primary)">0</span> ₽</div>
-            <button class="btn btn-orange" style="margin-top:15px" onclick="location.reload()">ОБНОВИТЬ</button>
-            <button class="btn btn-blue" style="margin-top:15px" onclick="localStorage.clear(); location.reload();">ВЫЙТИ</button>
-        </div>
-    </div>
 
-    <!-- Кейс -->
-    <div class="glass-panel" style="padding:40px; margin-bottom: 50px; border: 2px solid var(--primary);">
-        <h2 style="font-family: Orbitron;">🎁 ЕЖЕДНЕВНЫЙ БОНУС</h2>
-        <div id="res-val" style="font-size: 50px; font-weight: 900; margin: 20px 0; color: var(--primary);">?</div>
-        <button id="spin-btn" class="btn btn-green" style="width:100%; max-width:400px;" onclick="spin()">КРУТИТЬ БЕСПЛАТНО</button>
-    </div>
+        <!-- Карточка 2 -->
+        <div class="card">
+            <div class="card-header">PREMIUM</div>
+            <div class="card-body">
+                <div class="price">300 <span>РУБ/МЕС</span></div>
+                <ul class="features">
+                    <li>Все функции VIP</li>
+                    <li>Уникальные эффекты выстрелов</li>
+                    <li>Иммунитет к кику за простой</li>
+                    <li>Доступ к !admin меню (огр.)</li>
+                </ul>
+                <button class="btn-buy" onclick="openModal('PREMIUM')">КУПИТЬ</button>
+            </div>
+        </div>
 
-    <!-- Магазин -->
-    <div class="grid">
-        <div class="glass-panel card">
-            <h3 style="font-family:Orbitron;">VIP SYSTEM GOLD</h3>
-            <p>Уникальное меню и золотые модели.</p>
-            <div class="price">450 ₽</div>
-            <button class="btn btn-orange" onclick="buy('VIP Gold', 450)">КУПИТЬ ТОВАР</button>
+        <!-- Карточка 3 -->
+        <div class="card">
+            <div class="card-header">ELITE</div>
+            <div class="card-body">
+                <div class="price">500 <span>РУБ/МЕС</span></div>
+                <ul class="features">
+                    <li>Все функции PREMIUM</li>
+                    <li>Выбор любого скина агента</li>
+                    <li>Приоритет в техподдержке</li>
+                    <li>Золотой цвет ника в табе</li>
+                </ul>
+                <button class="btn-buy" onclick="openModal('ELITE')">КУПИТЬ</button>
+            </div>
         </div>
-        <div class="glass-panel card">
-            <h3 style="font-family:Orbitron;">ADMIN SKINS HD</h3>
-            <p>Пакет моделей для администрации.</p>
-            <div class="price">250 ₽</div>
-            <button class="btn btn-blue" onclick="buy('Admin Skins', 250)">КУПИТЬ ТОВАР</button>
-        </div>
+
+    </div>
+</div>
+
+<!-- Модальное окно оформления -->
+<div id="buyModal" class="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="modalTitle">Оформление покупки</h2>
+        <form id="orderForm">
+            <input type="text" placeholder="Ваш SteamID или Ник" required>
+            <select>
+                <option value="30">Срок: 30 дней</option>
+                <option value="90">Срок: 90 дней</option>
+                <option value="0">Навсегда</option>
+            </select>
+            <input type="email" placeholder="Ваш Email для чека" required>
+            <button type="submit" class="btn-buy" style="width: 100%; margin-top: 10px;">ПЕРЕЙТИ К ОПЛАТЕ</button>
+        </form>
     </div>
 </div>
 
 <script>
-    // Массивы для ленты (сохраняются без звездочек)
-    let winsHistory = JSON.parse(localStorage.getItem('winsHistory')) || [];
-    let buysHistory = JSON.parse(localStorage.getItem('buysHistory')) || [];
-
-    function login() {
-        const name = document.getElementById('u-login').value.trim();
-        if(name) {
-            localStorage.setItem('user', name);
-            if(name === 'admin') localStorage.setItem('bal', 50000);
-            else if(!localStorage.getItem('bal')) localStorage.setItem('bal', 0);
-            location.reload();
-        }
+    function openModal(itemName) {
+        document.getElementById('modalTitle').innerText = 'Купить: ' + itemName;
+        document.getElementById('buyModal').style.display = 'flex';
     }
 
-    function spin() {
-        const user = localStorage.getItem('user');
-        if(!user) return alert("Войдите в кабинет!");
-        
-        const win =;
-        let bal = parseFloat(localStorage.getItem('bal'));
-        bal += win;
-        localStorage.setItem('bal', bal);
-        
-        // Добавляем ПОЛНЫЙ НИК в историю
-        winsHistory.unshift({n: user, v: win});
-        localStorage.setItem('winsHistory', JSON.stringify(winsHistory));
-        
-        document.getElementById('res-val').innerText = win + " ₽";
-        updateFeeds();
-        alert("Вы выиграли " + win + " ₽!");
+    function closeModal(event) {
+        document.getElementById('buyModal').style.display = 'none';
     }
 
-    function buy(name, price) {
-        const user = localStorage.getItem('user');
-        if(!user) return alert("Войдите в кабинет!");
-        let bal = parseFloat(localStorage.getItem('bal'));
-        if(bal < price) return alert("Мало денег!");
-        
-        bal -= price;
-        localStorage.setItem('bal', bal);
-        
-        // Добавляем ПОЛНЫЙ НИК в историю
-        buysHistory.unshift({n: user, v: name});
-        localStorage.setItem('buysHistory', JSON.stringify(buysHistory));
-        
-        updateFeeds();
-        alert("Успешная покупка: " + name);
-        location.reload();
-    }
-
-    function updateFeeds() {
-        document.getElementById('win-feed').innerHTML = winsHistory.slice(0, 4).map(i => 
-            `<div class="feed-item"><b>${i.n}</b> <span style="color:var(--primary)">+${i.v} ₽</span></div>`
-        ).join('');
-        
-        document.getElementById('buy-feed').innerHTML = buysHistory.slice(0, 4).map(i => 
-            `<div class="feed-item"><b>${i.n}</b> <span style="color:var(--accent)">${i.v}</span></div>`
-        ).join('');
-    }
-
-    // Загрузка интерфейса
-    const user = localStorage.getItem('user');
-    if(user) {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('user-profile').classList.remove('hidden');
-        document.getElementById('hello-text').innerText = "ПРИВЕТ, " + user.toUpperCase();
-        document.getElementById('u-bal').innerText = localStorage.getItem('bal');
-    }
-    updateFeeds();
+    document.getElementById('orderForm').onsubmit = function(e) {
+        e.preventDefault();
+        alert('Система оплаты не подключена. Здесь должен быть переход на UnitPay или FreeKassa.');
+    };
 </script>
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>CS LUXURY | Levels & Ranks</title>
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
-    <style>
-        :root { --primary: #00ff41; --accent: #ff9d00; --blue: #0084ff; --glass: rgba(255, 255, 255, 0.08); }
-        body {
-            background: #050505 url('https://w.forfun.com') no-repeat center center fixed;
-            background-size: cover; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; backdrop-filter: brightness(0.4);
-        }
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        /* ПРОФИЛЬ С УРОВНЕМ */
-        .profile-area { display: flex; align-items: center; gap: 20px; border-left: 4px solid var(--blue); position: relative; }
-        .avatar-box { width: 80px; height: 80px; border-radius: 15px; border: 2px solid var(--blue); overflow: hidden; cursor: pointer; transition: 0.4s; flex-shrink: 0; }
-        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .rank-text { font-size: 10px; color: var(--accent); font-weight: bold; letter-spacing: 1px; margin-top: 5px; text-transform: uppercase; }
-        
-        /* ШКАЛА ОПЫТА (XP BAR) */
-        .xp-container { width: 100%; background: rgba(0,0,0,0.5); height: 6px; border-radius: 10px; margin-top: 10px; overflow: hidden; border: 1px solid #333; }
-        .xp-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--primary)); width: 0%; transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        .top-hub { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 40px; }
-        .case-area { border: 1px solid var(--primary); display: flex; align-items: center; justify-content: space-between; }
-        
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; }
-        .btn-green { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
-        .btn-blue { background: var(--blue); color: #fff; width: 100%; }
-        
-        .hidden { display: none !important; }
-        .avatar-selector { display: none; position: absolute; top: 110%; left: 0; background: rgba(0,0,0,0.9); border: 1px solid var(--blue); padding: 10px; border-radius: 15px; z-index: 100; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .avatar-selector.active { display: grid; }
-        .avatar-selector img { width: 45px; height: 45px; border-radius: 8px; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header style="text-align: center; padding: 20px 0;"><h1 style="font-family:'Orbitron'; letter-spacing: 4px;">CS <span style="color:var(--primary)">LUXURY</span></h1></header>
-
-    <div class="top-hub">
-        <!-- ЛИЧНЫЙ КАБИНЕТ -->
-        <div class="glass profile-area">
-            <div id="login-form" style="width:100%">
-                <input type="text" id="u-login" placeholder="Ваш Никнейм" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #444; color:#fff; border-radius:8px;">
-                <button class="btn btn-blue" onclick="login()">СОЗДАТЬ АККАУНТ</button>
-            </div>
-            
-            <div id="user-profile" class="hidden" style="display:flex; flex-direction:column; width:100%">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div class="avatar-box" onclick="toggleAvatars()">
-                        <img id="cur-avatar" src="https://i.imgur.com">
-                    </div>
-                    <div style="flex-grow:1">
-                        <div id="hello-text" style="font-weight:800; font-size:16px;"></div>
-                        <div id="rank-name" class="rank-text">Silver I</div>
-                        <div style="font-size:22px; font-weight:900; color:var(--primary); font-family:'Orbitron';"><span id="u-bal">0</span> ₽</div>
-                    </div>
-                </div>
-                
-                <div class="xp-container"><div id="xp-bar" class="xp-bar"></div></div>
-                <div style="font-size:9px; color:#555; margin-top:4px; text-align:right;">LVL: <span id="u-lvl">1</span> | XP: <span id="u-xp">0</span>/500</div>
-
-                <div id="avatar-list" class="avatar-selector">
-                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
-                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
-                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
-                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
-                </div>
-                <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:#444; cursor:pointer; font-size:9px; text-decoration:underline; margin-top:10px; width:fit-content;">ВЫЙТИ</button>
-            </div>
-        </div>
-
-        <!-- КЕЙС -->
-        <div class="glass case-area">
-            <div>
-                <h3 style="margin:0; font-family:'Orbitron'; font-size:14px; color:var(--primary);">КЕЙС УДАЧИ</h3>
-                <p style="font-size:9px; color:#666;">+XP за каждый прокрут</p>
-                <button id="spin-btn" class="btn btn-green" style="margin-top:15px" onclick="spin()">КРУТИТЬ</button>
-            </div>
-            <div id="res-val" style="font-size:40px; font-weight:900; color:var(--primary); text-shadow:0 0 10px var(--primary);">📦</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const ranks = ["Silver I", "Silver Elite", "Gold Nova", "Master Guardian", "Legendary Eagle", "Global Elite"];
-
-    function login() {
-        const name = document.getElementById('u-login').value.trim();
-        if(name) {
-            localStorage.setItem('user', name);
-            localStorage.setItem('bal', 0);
-            localStorage.setItem('xp', 0);
-            localStorage.setItem('lvl', 1);
-            localStorage.setItem('avatar', 'https://i.imgur.com');
-            location.reload();
-        }
-    }
-
-    function spin() {
-        const user = localStorage.getItem('user');
-        if(!user) return alert("Войдите!");
-        const btn = document.getElementById('spin-btn');
-        btn.disabled = true;
-        
-        let count = 0;
-        let t = setInterval(() => {
-            document.getElementById('res-val').innerText = Math.floor(Math.random() * 50);
-            count++;
-            if(count > 10) {
-                clearInterval(t);
-                const win =;
-                const result = win[Math.floor(Math.random() * win.length)];
-                
-                // Начисление денег и XP
-                let bal = parseFloat(localStorage.getItem('bal'));
-                let xp = parseInt(localStorage.getItem('xp'));
-                let lvl = parseInt(localStorage.getItem('lvl'));
-
-                bal += result;
-                xp += result; // 1 рубль = 1 опыт
-
-                // Логика уровней (каждые 500 XP новый уровень)
-                if(xp >= lvl * 500) {
-                    lvl++;
-                    alert("НОВЫЙ УРОВЕНЬ: " + lvl + "!");
-                }
-
-                localStorage.setItem('bal', bal);
-                localStorage.setItem('xp', xp);
-                localStorage.setItem('lvl', lvl);
-                
-                document.getElementById('res-val').innerText = result;
-                updateUI();
-                btn.disabled = false;
-            }
-        }, 100);
-    }
-
-    function updateUI() {
-        const user = localStorage.getItem('user');
-        if(user) {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('hello-text').innerText = user.toUpperCase();
-            
-            const bal = localStorage.getItem('bal');
-            const xp = parseInt(localStorage.getItem('xp'));
-            const lvl = parseInt(localStorage.getItem('lvl'));
-            const nextLvlXp = lvl * 500;
-            const progress = (xp / nextLvlXp) * 100;
-
-            document.getElementById('u-bal').innerText = bal;
-            document.getElementById('u-xp').innerText = xp;
-            document.getElementById('u-lvl').innerText = lvl;
-            document.getElementById('u-bal').innerText = bal;
-            document.getElementById('xp-bar').style.width = progress + "%";
-            
-            // Звание
-            const rankIdx = Math.min(lvl - 1, ranks.length - 1);
-            document.getElementById('rank-name').innerText = ranks[rankIdx];
-            document.getElementById('cur-avatar').src = localStorage.getItem('avatar');
-        }
-    }
-
-    function toggleAvatars() { document.getElementById('avatar-list').classList.toggle('active'); }
-    function setAvatar(url) { localStorage.setItem('avatar', url); location.reload(); }
-
-    updateUI();
-</script>
 </body>
 </html>
