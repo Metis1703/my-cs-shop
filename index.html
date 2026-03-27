@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CYBER_SYS — TOTAL RESTORE</title>
+    <title>CYBER_HUB — METIS EDITION</title>
     <style>
         :root { 
             --neon-blue: #00f2ff; --neon-purple: #bc13fe; --neon-pink: #ff00de;
@@ -12,204 +12,181 @@
         header { background: rgba(0,0,0,0.9); padding: 15px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
         .nav-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; margin: 2px; }
         .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 380px; gap: 25px; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: #0a0a0a; padding: 35px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 320px; text-align: center; }
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; margin-left: 5px; color: #000; }
-        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-        .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 8px; }
-        .user-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; margin-left: 5px; color: #000; background: var(--neon-gold); }
+        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h1 style="color:var(--neon-blue); margin-top:0">CYBER_SYS</h1>
+        <h1 style="color:var(--neon-blue); margin-top:0">CYBER_HUB</h1>
         <input type="text" id="u-login" placeholder="ЛОГИН">
-        <input type="email" id="u-email" placeholder="EMAIL">
         <input type="password" id="u-pass" placeholder="ПАРОЛЬ">
-        <button class="nav-btn" style="width:100%; padding:14px" onclick="auth()">ВХОД / РЕГИСТРАЦИЯ</button>
-        <span style="color:var(--neon-pink); cursor:pointer; font-size:11px; display:block; margin-top:10px" onclick="recoverAccess()">ЗАБЫЛИ ПАРОЛЬ?</span>
+        <button class="nav-btn" style="width:100%; padding:14px" onclick="auth()">ВОЙТИ / СОЗДАТЬ</button>
     </div>
 </div>
 
 <header id="header">
     <div style="display:flex; align-items:center; gap:12px">
         <img id="h-ava" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--neon-blue); object-fit:cover">
-        <div><b id="h-name"></b><span id="h-role"></span><br><span id="h-bal" style="color:var(--neon-pink)">0</span> ₽</div>
+        <div><b id="h-name"></b><span id="h-badge"></span><br><span id="h-bal" style="color:var(--neon-pink)">0</span> ₽</div>
     </div>
     <div style="display:flex; gap:5px">
         <button id="admin-btn" class="nav-btn" style="border-color:var(--neon-gold); color:var(--neon-gold); display:none" onclick="openPage('admin')">👑 УПРАВЛЕНИЕ</button>
         <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
         <button class="nav-btn" onclick="openPage('main')">ПРОФИЛЬ</button>
-        <button class="nav-btn" style="border-color:red; color:red" onclick="logout()">ВЫЙТИ</button>
+        <button class="nav-btn" style="border-color:red; color:red" onclick="logout()">ВЫХОД</button>
     </div>
 </header>
 
 <div class="container" id="main-content">
     <div id="pages">
-        <!-- ПРОФИЛЬ -->
         <div id="page-main">
-            <div class="card">
-                <h3>🎒 МОЙ ИНВЕНТАРЬ</h3>
-                <div id="u-inv" class="inv-grid"></div>
-            </div>
-            <div class="card">
-                <h3>👥 МОИ КОНТАКТЫ</h3>
-                <div style="display:flex; gap:10px"><input type="text" id="f-search" placeholder="Ник..."><button class="nav-btn" onclick="addFriend()">+</button></div>
-                <div id="f-list" style="margin-top:10px"></div>
-            </div>
-            <div class="card">
-                <h3 style="color:var(--neon-pink)">🆘 СВЯЗЬ С CORE</h3>
-                <textarea id="ticket-text" placeholder="Опишите проблему..."></textarea>
-                <button class="nav-btn" style="width:100%; border-color:var(--neon-pink); color:var(--neon-pink)" onclick="sendTicket()">ОТПРАВИТЬ ТИКЕТ</button>
-            </div>
+            <div class="card"><h3>🎒 ИНВЕНТАРЬ</h3><div id="u-inv" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div></div>
         </div>
-
-        <!-- МАРКЕТ -->
         <div id="page-shop" style="display:none">
-            <div class="card"><h3>🛒 МАРКЕТ СЕТИ</h3><div id="m-list" class="market-grid"></div></div>
+            <div class="card"><h3>🛒 МАГАЗИН CS 1.6</h3><div id="m-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:15px;"></div></div>
         </div>
-
-        <!-- АДМИНКА -->
         <div id="page-admin" style="display:none">
             <div class="card">
                 <h3>📦 ВЫСТАВИТЬ ТОВАР</h3>
                 <input type="text" id="adm-n" placeholder="Имя">
                 <input type="number" id="adm-p" placeholder="Цена">
-                <input type="text" id="adm-i" placeholder="Эмодзи">
-                <button class="nav-btn" style="width:100%" onclick="createItem()">СОЗДАТЬ</button>
+                <input type="text" id="adm-link" placeholder="Ссылка на файл">
+                <button class="nav-btn" style="width:100%" onclick="createItem()">ДОБАВИТЬ В МАРКЕТ</button>
             </div>
-            <div class="card"><h3>📩 ТИКЕТЫ / ЮЗЕРЫ</h3><div id="adm-data"></div></div>
+            <div class="card">
+                <h3>👥 ПОЛЬЗОВАТЕЛИ</h3>
+                <div id="adm-users"></div>
+            </div>
         </div>
     </div>
-
     <div class="sidebar">
         <div class="card">
-            <h4>💬 ЧАТ</h4>
-            <div id="chat" style="height:350px; overflow-y:auto; font-size:13px; margin-bottom:10px"></div>
-            <input type="text" id="chat-in" placeholder="Связь..." onkeypress="if(event.key==='Enter') sendMsg()">
+            <h4>💬 КАНАЛ СВЯЗИ</h4>
+            <div id="chat" style="height:300px; overflow-y:auto; font-size:12px; margin-bottom:10px"></div>
+            <input type="text" id="chat-in" placeholder="Сказать..." onkeypress="if(event.key==='Enter') sendMsg()">
         </div>
     </div>
 </div>
 
 <script>
-    const OWNER = "admin";
-    // ЕДИНАЯ БАЗА
-    let db = JSON.parse(localStorage.getItem('CYBER_ULTIMATE_STORAGE')) || { users: {}, msgs: [], market: [], tickets: [] };
-    let user = localStorage.getItem('cyber_user');
+    // --- ТВОИ ПЕРСОНАЛЬНЫЕ ДАННЫЕ ---
+    const MY_LOGIN = "Metis"; 
+    const MY_PASS = "1703"; 
 
-    function save() { localStorage.setItem('CYBER_ULTIMATE_STORAGE', JSON.stringify(db)); }
+    let db = JSON.parse(localStorage.getItem('CYBER_DATA_METIS_V1')) || { users: {}, msgs: [], market: [] };
+    let user = localStorage.getItem('active_user');
+
+    function save() { localStorage.setItem('CYBER_DATA_METIS_V1', JSON.stringify(db)); }
 
     function auth() {
         const l = document.getElementById('u-login').value.trim();
-        const e = document.getElementById('u-email').value.trim();
-        const p = btoa(document.getElementById('u-pass').value);
+        const p = document.getElementById('u-pass').value;
         if(!l || !p) return;
 
-        if(!db.users[l]) {
-            // Проверка уникальности
-            if(Object.values(db.users).some(u => u.email === e)) return alert("Email занят!");
-            db.users[l] = { pass: p, email: e, bal: 500, inv: [], friends: [], isAdmin: false, isBanned: false, ava: "https://api.dicebear.com"+l };
-        } else {
-            if(db.users[l].isBanned) return alert("ДОСТУП ЗАБЛОКИРОВАН");
-            if(db.users[l].pass !== p) return alert("Пароль неверный!");
+        // Блокировка попыток занять твой ник чужим паролем
+        if(l === MY_LOGIN && p !== MY_PASS) {
+            return alert("ОШИБКА: НЕДОПУСТИМЫЙ ПАРОЛЬ ДЛЯ ДАННОГО АККАУНТА.");
         }
-        user = l; localStorage.setItem('cyber_user', l); save(); location.reload();
+
+        if(!db.users[l]) {
+            // Если кто-то другой пытается зарегистрировать твой ник
+            if(l === MY_LOGIN && p !== MY_PASS) return;
+            
+            db.users[l] = { 
+                pass: btoa(p), 
+                bal: 1000, 
+                inv: [], 
+                isOwner: (l === MY_LOGIN), 
+                ava: "https://api.dicebear.com"+l 
+            };
+        } else if(atob(db.users[l].pass) !== p) {
+            return alert("Неверный пароль!");
+        }
+
+        user = l; localStorage.setItem('active_user', l); save(); location.reload();
     }
 
     if(user && db.users[user]) {
-        const u = db.users[user];
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
         document.getElementById('main-content').style.display = 'grid';
+        if(user === MY_LOGIN) {
+            document.getElementById('admin-btn').style.display = 'block';
+        }
+        init();
+    }
+
+    function init() {
+        const u = db.users[user];
         document.getElementById('h-name').innerText = user;
         document.getElementById('h-bal').innerText = u.bal;
         document.getElementById('h-ava').src = u.ava;
-        
-        if(user === OWNER || u.isAdmin) {
-            document.getElementById('admin-btn').style.display = 'block';
-            document.getElementById('h-role').innerHTML = user === OWNER ? '<span class="badge" style="background:var(--neon-gold)">OWNER</span>' : '<span class="badge" style="background:var(--neon-green)">ADMIN</span>';
-        }
-        renderAll(); setInterval(renderChat, 3000);
+        if(user === MY_LOGIN) document.getElementById('h-badge').innerHTML = '<span class="badge">OWNER</span>';
+        renderInv(); renderMarket(); renderChat();
+        if(user === MY_LOGIN) renderUsers();
     }
 
-    function renderAll() {
-        const u = db.users[user];
-        document.getElementById('u-inv').innerHTML = (u.inv || []).map(i => `<div style="background:rgba(0,242,255,0.1); border:1px solid var(--neon-blue); text-align:center; border-radius:5px; padding:5px" title="${i.n}">${i.i}</div>`).join('');
-        document.getElementById('f-list').innerHTML = u.friends.map(f => `<div class="user-row"><span>${f}</span><button onclick="remFriend('${f}')" style="background:none;border:none;color:red;cursor:pointer">✕</button></div>`).join('');
-        renderMarket(); renderChat(); if(user === OWNER || db.users[user].isAdmin) renderAdmin();
+    function renderUsers() {
+        document.getElementById('adm-users').innerHTML = Object.keys(db.users).map(n => `
+            <div class="user-row">
+                <span>${n} (${db.users[n].bal}₽)</span>
+                <button class="nav-btn" style="font-size:8px" onclick="db.users['${n}'].bal+=500;save();init();">+500</button>
+            </div>
+        `).join('');
     }
 
     function createItem() {
-        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), i = document.getElementById('adm-i').value;
-        if(n && p) { db.market.push({ id: Date.now(), n, p, i: i || "📦" }); save(); renderMarket(); }
+        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), link = document.getElementById('adm-link').value;
+        if(n && p) { db.market.push({ id:Date.now(), n, p, link }); save(); renderMarket(); alert("Товар добавлен!"); }
     }
 
     function renderMarket() {
         document.getElementById('m-list').innerHTML = db.market.map(m => `
             <div class="card" style="text-align:center; margin:0">
-                <div style="font-size:25px">${m.i}</div><b>${m.n}</b><br><small>${m.p} ₽</small><br>
-                <button class="nav-btn" style="width:100%; margin-top:5px" onclick="buy('${m.id}')">BUY</button>
+                <b>${m.n}</b><br><small>${m.p} ₽</small><br>
+                <button class="nav-btn" style="width:100%; margin-top:10px" onclick="buyItem(${m.id})">КУПИТЬ</button>
             </div>
         `).join('');
     }
 
-    function buy(id) {
+    function buyItem(id) {
         const it = db.market.find(x => x.id == id);
         if(db.users[user].bal >= it.p) {
             db.users[user].bal -= it.p;
             db.users[user].inv.push(it);
-            save(); renderAll(); alert("Приобретено!");
-        } else alert("Недостаточно средств!");
+            save(); init();
+        } else alert("Недостаточно средств.");
     }
 
-    function renderAdmin() {
-        const data = document.getElementById('adm-data');
-        let html = "<h4>ТИКЕТЫ:</h4>" + db.tickets.map(t => `<div style="font-size:10px; margin-bottom:5px; border-left:2px solid gold; padding-left:5px"><b>${t.from}:</b> ${t.text}</div>`).join('');
-        html += "<h4 style='margin-top:20px'>ЮЗЕРЫ:</h4>" + Object.keys(db.users).map(n => `
-            <div class="user-row">
-                <span style="${db.users[n].isBanned?'color:red':''}">${n}</span>
-                <div>
-                    <button class="nav-btn" style="font-size:8px" onclick="db.users['${n}'].bal+=500;save();renderAll();">+500</button>
-                    <button class="nav-btn" style="font-size:8px; border-color:red" onclick="db.users['${n}'].isBanned=!db.users['${n}'].isBanned;save();renderAdmin();">BAN</button>
-                    ${user===OWNER?`<button class="nav-btn" style="font-size:8px; border-color:var(--neon-green)" onclick="db.users['${n}'].isAdmin=!db.users['${n}'].isAdmin;save();renderAdmin();">ADM</button>`:''}
-                </div>
+    function renderInv() {
+        document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `
+            <div style="border:1px solid var(--neon-blue); padding:10px; text-align:center; border-radius:10px">
+                <small>${i.n}</small><br>
+                <a href="${i.link}" target="_blank" style="color:var(--neon-green); font-size:10px; font-weight:bold; text-decoration:none">СКАЧАТЬ</a>
             </div>
         `).join('');
-        data.innerHTML = html;
     }
-
-    function sendTicket() {
-        const t = document.getElementById('ticket-text').value;
-        if(t) { db.tickets.push({from:user, text:t}); save(); alert("Отправлено!"); document.getElementById('ticket-text').value=""; }
-    }
-
-    function addFriend() {
-        const n = document.getElementById('f-search').value.trim();
-        if(db.users[n] && n!==user) { db.users[user].friends.push(n); save(); renderAll(); }
-    }
-    function remFriend(n) { db.users[user].friends = db.users[user].friends.filter(x=>x!==n); save(); renderAll(); }
 
     function sendMsg() {
         const i = document.getElementById('chat-in');
-        db.msgs.push({ u: user, t: i.value }); save(); i.value = ""; renderChat();
+        if(!i.value) return;
+        db.msgs.push({ u: user, t: i.value });
+        save(); i.value = ""; renderChat();
     }
     function renderChat() {
-        document.getElementById('chat').innerHTML = db.msgs.map(m => `<div><b>${m.u}:</b> ${m.t}</div>`).join('');
+        document.getElementById('chat').innerHTML = db.msgs.slice(-50).map(m => `<div><b>${m.u}:</b> ${m.t}</div>`).join('');
         document.getElementById('chat').scrollTop = 99999;
     }
-
     function openPage(p) { ["page-main", "page-shop", "page-admin"].forEach(id => document.getElementById(id).style.display = id.includes(p) ? 'block' : 'none'); }
-    function logout() { localStorage.removeItem('cyber_user'); location.reload(); }
-    function recoverAccess() { 
-        const e = prompt("Email:");
-        const u = Object.keys(db.users).find(k => db.users[k].email === e);
-        if(u) alert("Логин: "+u+"\nПароль: "+atob(db.users[u].pass));
-    }
+    function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
 </body>
 </html>
