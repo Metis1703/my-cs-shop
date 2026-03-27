@@ -656,3 +656,180 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>CS LUXURY | Levels & Ranks</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root { --primary: #00ff41; --accent: #ff9d00; --blue: #0084ff; --glass: rgba(255, 255, 255, 0.08); }
+        body {
+            background: #050505 url('https://w.forfun.com') no-repeat center center fixed;
+            background-size: cover; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; backdrop-filter: brightness(0.4);
+        }
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* ПРОФИЛЬ С УРОВНЕМ */
+        .profile-area { display: flex; align-items: center; gap: 20px; border-left: 4px solid var(--blue); position: relative; }
+        .avatar-box { width: 80px; height: 80px; border-radius: 15px; border: 2px solid var(--blue); overflow: hidden; cursor: pointer; transition: 0.4s; flex-shrink: 0; }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .rank-text { font-size: 10px; color: var(--accent); font-weight: bold; letter-spacing: 1px; margin-top: 5px; text-transform: uppercase; }
+        
+        /* ШКАЛА ОПЫТА (XP BAR) */
+        .xp-container { width: 100%; background: rgba(0,0,0,0.5); height: 6px; border-radius: 10px; margin-top: 10px; overflow: hidden; border: 1px solid #333; }
+        .xp-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--primary)); width: 0%; transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .top-hub { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 40px; }
+        .case-area { border: 1px solid var(--primary); display: flex; align-items: center; justify-content: space-between; }
+        
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; }
+        .btn-green { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+        .btn-blue { background: var(--blue); color: #fff; width: 100%; }
+        
+        .hidden { display: none !important; }
+        .avatar-selector { display: none; position: absolute; top: 110%; left: 0; background: rgba(0,0,0,0.9); border: 1px solid var(--blue); padding: 10px; border-radius: 15px; z-index: 100; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .avatar-selector.active { display: grid; }
+        .avatar-selector img { width: 45px; height: 45px; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header style="text-align: center; padding: 20px 0;"><h1 style="font-family:'Orbitron'; letter-spacing: 4px;">CS <span style="color:var(--primary)">LUXURY</span></h1></header>
+
+    <div class="top-hub">
+        <!-- ЛИЧНЫЙ КАБИНЕТ -->
+        <div class="glass profile-area">
+            <div id="login-form" style="width:100%">
+                <input type="text" id="u-login" placeholder="Ваш Никнейм" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #444; color:#fff; border-radius:8px;">
+                <button class="btn btn-blue" onclick="login()">СОЗДАТЬ АККАУНТ</button>
+            </div>
+            
+            <div id="user-profile" class="hidden" style="display:flex; flex-direction:column; width:100%">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="avatar-box" onclick="toggleAvatars()">
+                        <img id="cur-avatar" src="https://i.imgur.com">
+                    </div>
+                    <div style="flex-grow:1">
+                        <div id="hello-text" style="font-weight:800; font-size:16px;"></div>
+                        <div id="rank-name" class="rank-text">Silver I</div>
+                        <div style="font-size:22px; font-weight:900; color:var(--primary); font-family:'Orbitron';"><span id="u-bal">0</span> ₽</div>
+                    </div>
+                </div>
+                
+                <div class="xp-container"><div id="xp-bar" class="xp-bar"></div></div>
+                <div style="font-size:9px; color:#555; margin-top:4px; text-align:right;">LVL: <span id="u-lvl">1</span> | XP: <span id="u-xp">0</span>/500</div>
+
+                <div id="avatar-list" class="avatar-selector">
+                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
+                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
+                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
+                    <img onclick="setAvatar('https://i.imgur.com')" src="https://i.imgur.com">
+                </div>
+                <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:#444; cursor:pointer; font-size:9px; text-decoration:underline; margin-top:10px; width:fit-content;">ВЫЙТИ</button>
+            </div>
+        </div>
+
+        <!-- КЕЙС -->
+        <div class="glass case-area">
+            <div>
+                <h3 style="margin:0; font-family:'Orbitron'; font-size:14px; color:var(--primary);">КЕЙС УДАЧИ</h3>
+                <p style="font-size:9px; color:#666;">+XP за каждый прокрут</p>
+                <button id="spin-btn" class="btn btn-green" style="margin-top:15px" onclick="spin()">КРУТИТЬ</button>
+            </div>
+            <div id="res-val" style="font-size:40px; font-weight:900; color:var(--primary); text-shadow:0 0 10px var(--primary);">📦</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ranks = ["Silver I", "Silver Elite", "Gold Nova", "Master Guardian", "Legendary Eagle", "Global Elite"];
+
+    function login() {
+        const name = document.getElementById('u-login').value.trim();
+        if(name) {
+            localStorage.setItem('user', name);
+            localStorage.setItem('bal', 0);
+            localStorage.setItem('xp', 0);
+            localStorage.setItem('lvl', 1);
+            localStorage.setItem('avatar', 'https://i.imgur.com');
+            location.reload();
+        }
+    }
+
+    function spin() {
+        const user = localStorage.getItem('user');
+        if(!user) return alert("Войдите!");
+        const btn = document.getElementById('spin-btn');
+        btn.disabled = true;
+        
+        let count = 0;
+        let t = setInterval(() => {
+            document.getElementById('res-val').innerText = Math.floor(Math.random() * 50);
+            count++;
+            if(count > 10) {
+                clearInterval(t);
+                const win =;
+                const result = win[Math.floor(Math.random() * win.length)];
+                
+                // Начисление денег и XP
+                let bal = parseFloat(localStorage.getItem('bal'));
+                let xp = parseInt(localStorage.getItem('xp'));
+                let lvl = parseInt(localStorage.getItem('lvl'));
+
+                bal += result;
+                xp += result; // 1 рубль = 1 опыт
+
+                // Логика уровней (каждые 500 XP новый уровень)
+                if(xp >= lvl * 500) {
+                    lvl++;
+                    alert("НОВЫЙ УРОВЕНЬ: " + lvl + "!");
+                }
+
+                localStorage.setItem('bal', bal);
+                localStorage.setItem('xp', xp);
+                localStorage.setItem('lvl', lvl);
+                
+                document.getElementById('res-val').innerText = result;
+                updateUI();
+                btn.disabled = false;
+            }
+        }, 100);
+    }
+
+    function updateUI() {
+        const user = localStorage.getItem('user');
+        if(user) {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('user-profile').classList.remove('hidden');
+            document.getElementById('hello-text').innerText = user.toUpperCase();
+            
+            const bal = localStorage.getItem('bal');
+            const xp = parseInt(localStorage.getItem('xp'));
+            const lvl = parseInt(localStorage.getItem('lvl'));
+            const nextLvlXp = lvl * 500;
+            const progress = (xp / nextLvlXp) * 100;
+
+            document.getElementById('u-bal').innerText = bal;
+            document.getElementById('u-xp').innerText = xp;
+            document.getElementById('u-lvl').innerText = lvl;
+            document.getElementById('u-bal').innerText = bal;
+            document.getElementById('xp-bar').style.width = progress + "%";
+            
+            // Звание
+            const rankIdx = Math.min(lvl - 1, ranks.length - 1);
+            document.getElementById('rank-name').innerText = ranks[rankIdx];
+            document.getElementById('cur-avatar').src = localStorage.getItem('avatar');
+        }
+    }
+
+    function toggleAvatars() { document.getElementById('avatar-list').classList.toggle('active'); }
+    function setAvatar(url) { localStorage.setItem('avatar', url); location.reload(); }
+
+    updateUI();
+</script>
+</body>
+</html>
