@@ -239,7 +239,6 @@
     function createItem() { const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), i = document.getElementById('adm-img').value, l = document.getElementById('adm-link').value; if(n && p) { db.market.push({ id:Date.now(), n, p, img:i, link:l }); save(); init(); } }
     function renderSales() { document.getElementById('adm-sales').innerHTML = db.sales.slice().reverse().map(s => `<div style="border-bottom:1px solid #333; padding:3px; font-size:10px">${s.buyer} -> ${s.item} (${s.price}₽)</div>`).join(''); }
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
-</script> const FIREBASE_URL = https://cyberhub-e8dfa-default-rtdb.firebaseio.com/
-
+</script> 
 </body>
 </html>
