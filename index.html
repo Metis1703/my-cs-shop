@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON MARKET — SYSTEM LOGS EDITION</title>
+    <title>НЕОНОВЫЙ МАРКЕТ — ПАНЕЛЬ СОЗДАТЕЛЯ</title>
     <style>
         :root { 
             --neon-blue: #00f2ff; --neon-purple: #bc13fe; --neon-pink: #ff00de;
@@ -21,16 +20,12 @@
         .btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
         .btn-gold:hover { background: var(--neon-gold); box-shadow: 0 0 20px var(--neon-gold); }
         .btn-red { border-color: var(--neon-red); color: var(--neon-red); }
-        .btn-red:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
 
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
 
         #chat-messages, #admin-logs { height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; font-family: monospace; font-size: 12px; }
-        .log-entry { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 5px 0; color: #aaa; }
-        .log-entry b { color: var(--neon-blue); }
-        
         .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .banned { color: var(--neon-red) !important; text-decoration: line-through; }
 
@@ -42,88 +37,97 @@
 
 <header id="header">
     <div style="display:flex; align-items:center; gap:12px">
-        <img src="https://i.pravatar.cc" style="width:40px; border-radius:50%; border:2px solid var(--neon-blue)">
-        <div><b id="h-name"></b><br><span id="h-bal" style="color:var(--neon-pink)">0</span> <small>CREDITS</small></div>
+        <div style="padding:5px; border:1px solid var(--neon-gold); border-radius:50%">👑</div>
+        <div><b id="h-name"></b><br><span id="h-bal" style="color:var(--neon-pink)">0</span> <small>БАЛАНС</small></div>
     </div>
     <div style="display:flex; gap:8px">
-        <button id="admin-btn" class="nav-btn btn-gold" onclick="openPage('admin')" style="display:none">ROOT_ACCESS</button>
-        <button class="nav-btn" onclick="openPage('shop')">MARKET</button>
-        <button class="nav-btn" onclick="openPage('inventory')">STORAGE</button>
-        <button class="nav-btn btn-red" onclick="logout()">EXIT</button>
+        <button id="admin-btn" class="nav-btn btn-gold" onclick="openPage('admin')" style="display:none">👑 АДМИН-ПАНЕЛЬ</button>
+        <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
+        <button class="nav-btn" onclick="openPage('inventory')">ИНВЕНТАРЬ</button>
+        <button class="nav-btn btn-red" onclick="logout()">ВЫХОД</button>
     </div>
 </header>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h1 style="color:var(--neon-blue); margin-top:0">SYSTEM_LOGIN</h1>
-        <input type="text" id="u-login" placeholder="IDENTIFIER">
-        <input type="password" id="u-pass" placeholder="ACCESS_KEY">
-        <button class="nav-btn" style="width:100%; padding:15px; margin-top:10px" onclick="handleAuth()">INITIALIZE</button>
-        <p onclick="toggleReg()" id="t-reg" style="font-size:11px; cursor:pointer; color:var(--neon-purple); margin-top:20px">NEW ID? REGISTER</p>
+        <h1 style="color:var(--neon-blue); margin-top:0">ВХОД В СИСТЕМУ</h1>
+        <input type="text" id="u-login" placeholder="ЛОГИН">
+        <input type="password" id="u-pass" placeholder="ПАРОЛЬ">
+        <button class="nav-btn" style="width:100%; padding:15px; margin-top:10px" onclick="handleAuth()">АВТОРИЗАЦИЯ</button>
+        <p onclick="toggleReg()" id="t-reg" style="font-size:11px; cursor:pointer; color:var(--neon-purple); margin-top:20px">НЕТ АККАУНТА? РЕГИСТРАЦИЯ</p>
     </div>
 </div>
 
 <div class="container" id="main-content">
     <div id="pages">
-        <div id="shop-page" class="card"><h3>🛒 MARKET</h3><div id="store-list"></div></div>
-        <div id="inventory-page" class="card" style="display:none"><h3>📦 MY_DATA</h3><div id="my-items"></div></div>
+        <div id="shop-page" class="card"><h3>🛒 МАРКЕТ ПЛАГИНОВ</h3><div id="store-list"></div></div>
+        <div id="inventory-page" class="card" style="display:none"><h3>📦 МОИ ПОКУПКИ</h3><div id="my-items"></div></div>
         <div id="admin-page" style="display:none">
             <div class="card">
-                <h3 style="color:var(--neon-gold)">🔐 USER_CONTROL</h3>
+                <h3 style="color:var(--neon-gold)">👑 УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</h3>
                 <div id="admin-user-list"></div>
             </div>
             <div class="card">
-                <h3 style="color:var(--neon-blue)">📜 SYSTEM_LOGS</h3>
+                <h3 style="color:var(--neon-blue)">📜 ЛОГИ СИСТЕМЫ</h3>
                 <div id="admin-logs"></div>
-                <button class="nav-btn btn-red" style="margin-top:10px; width:100%" onclick="clearLogs()">WIPE ALL LOGS</button>
             </div>
         </div>
     </div>
     <div class="card">
-        <h4>📡 UPLINK_CHAT</h4>
+        <h4>📡 ОБЩИЙ ЧАТ</h4>
         <div id="chat-messages"></div>
-        <input type="text" id="chat-in" placeholder="Broadcasting..." onkeypress="if(event.key==='Enter') sendChat()">
+        <input type="text" id="chat-in" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendChat()">
     </div>
 </div>
 
 <script>
+    const ADMIN_ID = "admin";
+    const ADMIN_PASS = btoa("creator777"); // ТВОЙ НОВЫЙ ПАРОЛЬ: creator777
+
     let db = JSON.parse(localStorage.getItem('cs_db')) || {};
     let logs = JSON.parse(localStorage.getItem('cs_logs')) || [];
     let currentUser = localStorage.getItem('active_user') || null;
     let isRegMode = false;
-    const ADMIN_ID = "admin";
+
+    // Инициализация админа
+    if (!db[ADMIN_ID]) {
+        db[ADMIN_ID] = { pass: ADMIN_PASS, bal: 9999, inv: [], isBanned: false };
+        save();
+    } else {
+        db[ADMIN_ID].pass = ADMIN_PASS; // Обновляем пароль принудительно
+        save();
+    }
 
     window.onload = () => { if(currentUser && db[currentUser]) checkStatus(); };
 
     function checkStatus() {
-        if(db[currentUser].isBanned) { addLog("SYSTEM", `Banned user ${currentUser} tried to connect.`); logout(); return; }
+        if(db[currentUser].isBanned) { alert("ВАШ АККАУНТ ЗАБЛОКИРОВАН"); logout(); return; }
         startSite();
     }
 
     function addLog(user, action) {
-        const time = new Date().toLocaleTimeString();
-        logs.unshift({ time, user, action });
-        if(logs.length > 50) logs.pop();
+        logs.unshift({ time: new Date().toLocaleTimeString(), user, action });
+        if(logs.length > 30) logs.pop();
         localStorage.setItem('cs_logs', JSON.stringify(logs));
     }
 
     function handleAuth() {
         const l = document.getElementById('u-login').value.trim();
         const p = btoa(document.getElementById('u-pass').value);
-        if(!l || !p) return;
+        if(!l || !p) return alert("ЗАПОЛНИТЕ ВСЕ ПОЛЯ");
 
         if(isRegMode) {
-            if(db[l]) return alert("ID TAKEN");
+            if(db[l]) return alert("ЛОГИН УЖЕ ЗАНЯТ");
             db[l] = { pass: p, bal: 0, inv: [], isBanned: false };
-            addLog("SYSTEM", `New identity created: ${l}`);
-            save(); alert("ID CREATED"); toggleReg();
+            addLog("СИСТЕМА", `Новый пользователь: ${l}`);
+            save(); alert("РЕГИСТРАЦИЯ УСПЕШНА"); toggleReg();
         } else {
             if(db[l] && db[l].pass === p) {
-                if(db[l].isBanned) return alert("ACCOUNT BANNED");
+                if(db[l].isBanned) return alert("ВЫ ЗАБАНЕНЫ");
                 currentUser = l; localStorage.setItem('active_user', l);
-                addLog(l, "Successfully logged in.");
+                addLog(l, "Вошел в систему");
                 startSite();
-            } else alert("ACCESS DENIED");
+            } else alert("НЕВЕРНЫЙ ЛОГИН ИЛИ ПАРОЛЬ");
         }
     }
 
@@ -131,49 +135,10 @@
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
         document.getElementById('main-content').style.display = 'grid';
-        document.getElementById('h-name').innerText = currentUser;
+        document.getElementById('h-name').innerText = currentUser + (currentUser === ADMIN_ID ? " [СОЗДАТЕЛЬ]" : "");
         document.getElementById('h-bal').innerText = db[currentUser].bal;
         if(currentUser === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
-        renderStore(); renderAdmin();
-    }
-
-    function renderAdmin() {
-        if(currentUser !== ADMIN_ID) return;
-        document.getElementById('admin-user-list').innerHTML = Object.keys(db).map(u => `
-            <div class="user-item">
-                <span class="${db[u].isBanned ? 'banned' : ''}">${u} [${db[u].bal} ₽]</span>
-                <div>
-                    <button class="nav-btn" onclick="editBal('${u}')">$</button>
-                    <button class="nav-btn btn-red" onclick="toggleBan('${u}')">${db[u].isBanned ? 'UNBAN' : 'BAN'}</button>
-                </div>
-            </div>`).join('');
-        
-        document.getElementById('admin-logs').innerHTML = logs.map(l => `
-            <div class="log-entry">[${l.time}] <b>${l.user}</b>: ${l.action}</div>`).join('');
-    }
-
-    function toggleBan(user) {
-        if(user === ADMIN_ID) return;
-        db[user].isBanned = !db[user].isBanned;
-        addLog(ADMIN_ID, `${db[user].isBanned ? 'BANNED' : 'UNBANNED'} user: ${user}`);
-        save(); renderAdmin();
-    }
-
-    function editBal(u) {
-        let n = prompt("NEW BAL:", db[u].bal);
-        if(n !== null) { 
-            db[u].bal = parseInt(n); 
-            addLog(ADMIN_ID, `Modified balance for ${u} to ${n} credits.`);
-            save(); renderAdmin(); startSite(); 
-        }
-    }
-
-    function buy(p, n) {
-        if(db[currentUser].bal >= p) {
-            db[currentUser].bal -= p; db[currentUser].inv.push(n);
-            addLog(currentUser, `Purchased module: ${n} for ${p} credits.`);
-            save(); startSite();
-        } else alert("LOW BALANCE");
+        renderStore();
     }
 
     function openPage(p) {
@@ -185,19 +150,56 @@
         if(p === 'admin') renderAdmin();
     }
 
-    function renderStore() {
-        const items = [{id:1, n:"Army Ranks", p:500}, {id:2, n:"VIP CS2", p:300}];
-        document.getElementById('store-list').innerHTML = items.map(i => `
-            <div class="user-item"><span>${i.n} — <b>${i.p} ₽</b></span>
-            <button class="nav-btn" onclick="buy(${i.p}, '${i.n}')">BUY</button></div>`).join('');
+    function renderAdmin() {
+        if(currentUser !== ADMIN_ID) return;
+        document.getElementById('admin-user-list').innerHTML = Object.keys(db).map(u => `
+            <div class="user-item">
+                <span class="${db[u].isBanned ? 'banned' : ''}">${u} [${db[u].bal} ₽]</span>
+                <div>
+                    <button class="nav-btn" onclick="editBal('${u}')">₽</button>
+                    <button class="nav-btn btn-red" onclick="toggleBan('${u}')">${db[u].isBanned ? 'РАЗБАН' : 'БАН'}</button>
+                </div>
+            </div>`).join('');
+        
+        document.getElementById('admin-logs').innerHTML = logs.map(l => `
+            <div>[${l.time}] <b>${l.user}</b>: ${l.action}</div>`).join('');
     }
 
-    function clearLogs() { logs = []; localStorage.removeItem('cs_logs'); renderAdmin(); }
-    function toggleReg() { isRegMode = !isRegMode; document.getElementById('t-reg').innerText = isRegMode ? "LOGIN" : "REGISTER"; }
+    function toggleBan(user) {
+        if(user === ADMIN_ID) return alert("НЕЛЬЗЯ ЗАБАНИТЬ СОЗДАТЕЛЯ");
+        db[user].isBanned = !db[user].isBanned;
+        addLog(ADMIN_ID, `Изменил статус бана для ${user}`);
+        save(); renderAdmin();
+    }
+
+    function editBal(u) {
+        let n = prompt("НОВЫЙ БАЛАНС ДЛЯ " + u + ":", db[u].bal);
+        if(n !== null) { 
+            db[u].bal = parseInt(n); 
+            addLog(ADMIN_ID, `Изменил баланс ${u} на ${n}`); 
+            save(); renderAdmin(); startSite(); 
+        }
+    }
+
+    function renderStore() {
+        const items = [{id:1, n:"Army Ranks (CS2)", p:500}, {id:2, n:"VIP Menu Premium", p:300}];
+        document.getElementById('store-list').innerHTML = items.map(i => `
+            <div class="user-item"><span>${i.n}</span><button class="nav-btn" onclick="buy(${i.p}, '${i.n}')">КУПИТЬ ЗА ${i.p}₽</button></div>`).join('');
+    }
+
+    function buy(p, n) {
+        if(db[currentUser].bal >= p) {
+            db[currentUser].bal -= p; db[currentUser].inv.push(n);
+            addLog(currentUser, `Купил модуль: ${n}`);
+            save(); startSite();
+        } else alert("НЕДОСТАТОЧНО СРЕДСТВ");
+    }
+
+    function toggleReg() { isRegMode = !isRegMode; document.getElementById('t-reg').innerText = isRegMode ? "УЖЕ ЕСТЬ АККАУНТ? ВОЙТИ" : "НЕТ АККАУНТА? РЕГИСТРАЦИЯ"; }
     function sendChat() {
         const i = document.getElementById('chat-in');
         if(!i.value) return;
-        document.getElementById('chat-messages').innerHTML += `<div class="msg"><b>${currentUser}:</b> ${i.value}</div>`;
+        document.getElementById('chat-messages').innerHTML += `<div><b>${currentUser}:</b> ${i.value}</div>`;
         i.value = '';
     }
     function save() { localStorage.setItem('cs_db', JSON.stringify(db)); }
