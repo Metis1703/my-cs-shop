@@ -453,3 +453,206 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 1.6 LUXURY MARKET</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root { --primary: #00ff41; --accent: #ff9d00; --danger: #ff4141; --glass: rgba(255, 255, 255, 0.05); }
+        
+        body {
+            background: #050505 url('https://w.forfun.com') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            backdrop-filter: brightness(0.3);
+        }
+
+        /* Эффект стекла для блоков */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        header { padding: 80px 20px; text-align: center; }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; text-transform: uppercase; letter-spacing: 8px; margin: 0; text-shadow: 0 0 20px var(--primary); }
+        h1 span { color: var(--primary); }
+
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+
+        /* Живая лента без звездочек */
+        .live-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+        .feed { padding: 15px; height: 120px; overflow: hidden; font-size: 13px; }
+        .feed-item { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); animation: slideIn 0.4s ease; display: flex; justify-content: space-between; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Разноцветные неоновые кнопки */
+        .btn {
+            padding: 12px 25px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+        .btn-green { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+        .btn-orange { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+        .btn-blue { background: #0084ff; color: #fff; box-shadow: 0 0 15px #0084ff; }
+        .btn:hover { transform: scale(1.05) translateY(-3px); filter: brightness(1.2); }
+
+        /* Сетка товаров */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .card { padding: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.1); transition: 0.4s; }
+        .card:hover { border-color: var(--primary); background: rgba(255,255,255,0.08); }
+        
+        .price { font-size: 28px; font-weight: 900; margin: 15px 0; color: #fff; }
+
+        input { background: rgba(0,0,0,0.5); border: 1px solid #444; padding: 12px; color: #fff; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>CS <span>LUXURY</span></h1>
+    <p style="opacity:0.7">Премиальный маркетплейс скриптов</p>
+</header>
+
+<div class="container">
+    <!-- Живая лента (Полные ники) -->
+    <div class="live-row">
+        <div class="glass-panel feed">
+            <span style="color:var(--primary); font-size:10px; font-weight:bold;">● ПОСЛЕДНИЕ ВЫИГРЫШИ</span>
+            <div id="win-feed"></div>
+        </div>
+        <div class="glass-panel feed">
+            <span style="color:var(--accent); font-size:10px; font-weight:bold;">● ПОСЛЕДНИЕ ПОКУПКИ</span>
+            <div id="buy-feed"></div>
+        </div>
+    </div>
+
+    <!-- Личный кабинет -->
+    <div id="auth-block" class="glass-panel" style="padding: 40px; margin-bottom: 50px;">
+        <div id="login-form">
+            <h2 style="margin-top:0">ВХОД В СИСТЕМУ</h2>
+            <div style="display:flex; gap:10px; max-width:500px; margin:auto;">
+                <input type="text" id="u-login" placeholder="Введите ваш Ник">
+                <button class="btn btn-green" onclick="login()">ВОЙТИ</button>
+            </div>
+        </div>
+        <div id="user-profile" class="hidden">
+            <h2 id="hello-text">ПРИВЕТ, ИГРОК!</h2>
+            <div style="font-size: 32px; font-weight: 900;">БАЛАНС: <span id="u-bal" style="color:var(--primary)">0</span> ₽</div>
+            <button class="btn btn-orange" style="margin-top:15px" onclick="location.reload()">ОБНОВИТЬ</button>
+            <button class="btn btn-blue" style="margin-top:15px" onclick="localStorage.clear(); location.reload();">ВЫЙТИ</button>
+        </div>
+    </div>
+
+    <!-- Кейс -->
+    <div class="glass-panel" style="padding:40px; margin-bottom: 50px; border: 2px solid var(--primary);">
+        <h2 style="font-family: Orbitron;">🎁 ЕЖЕДНЕВНЫЙ БОНУС</h2>
+        <div id="res-val" style="font-size: 50px; font-weight: 900; margin: 20px 0; color: var(--primary);">?</div>
+        <button id="spin-btn" class="btn btn-green" style="width:100%; max-width:400px;" onclick="spin()">КРУТИТЬ БЕСПЛАТНО</button>
+    </div>
+
+    <!-- Магазин -->
+    <div class="grid">
+        <div class="glass-panel card">
+            <h3 style="font-family:Orbitron;">VIP SYSTEM GOLD</h3>
+            <p>Уникальное меню и золотые модели.</p>
+            <div class="price">450 ₽</div>
+            <button class="btn btn-orange" onclick="buy('VIP Gold', 450)">КУПИТЬ ТОВАР</button>
+        </div>
+        <div class="glass-panel card">
+            <h3 style="font-family:Orbitron;">ADMIN SKINS HD</h3>
+            <p>Пакет моделей для администрации.</p>
+            <div class="price">250 ₽</div>
+            <button class="btn btn-blue" onclick="buy('Admin Skins', 250)">КУПИТЬ ТОВАР</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Массивы для ленты (сохраняются без звездочек)
+    let winsHistory = JSON.parse(localStorage.getItem('winsHistory')) || [];
+    let buysHistory = JSON.parse(localStorage.getItem('buysHistory')) || [];
+
+    function login() {
+        const name = document.getElementById('u-login').value.trim();
+        if(name) {
+            localStorage.setItem('user', name);
+            if(name === 'admin') localStorage.setItem('bal', 50000);
+            else if(!localStorage.getItem('bal')) localStorage.setItem('bal', 0);
+            location.reload();
+        }
+    }
+
+    function spin() {
+        const user = localStorage.getItem('user');
+        if(!user) return alert("Войдите в кабинет!");
+        
+        const win =;
+        let bal = parseFloat(localStorage.getItem('bal'));
+        bal += win;
+        localStorage.setItem('bal', bal);
+        
+        // Добавляем ПОЛНЫЙ НИК в историю
+        winsHistory.unshift({n: user, v: win});
+        localStorage.setItem('winsHistory', JSON.stringify(winsHistory));
+        
+        document.getElementById('res-val').innerText = win + " ₽";
+        updateFeeds();
+        alert("Вы выиграли " + win + " ₽!");
+    }
+
+    function buy(name, price) {
+        const user = localStorage.getItem('user');
+        if(!user) return alert("Войдите в кабинет!");
+        let bal = parseFloat(localStorage.getItem('bal'));
+        if(bal < price) return alert("Мало денег!");
+        
+        bal -= price;
+        localStorage.setItem('bal', bal);
+        
+        // Добавляем ПОЛНЫЙ НИК в историю
+        buysHistory.unshift({n: user, v: name});
+        localStorage.setItem('buysHistory', JSON.stringify(buysHistory));
+        
+        updateFeeds();
+        alert("Успешная покупка: " + name);
+        location.reload();
+    }
+
+    function updateFeeds() {
+        document.getElementById('win-feed').innerHTML = winsHistory.slice(0, 4).map(i => 
+            `<div class="feed-item"><b>${i.n}</b> <span style="color:var(--primary)">+${i.v} ₽</span></div>`
+        ).join('');
+        
+        document.getElementById('buy-feed').innerHTML = buysHistory.slice(0, 4).map(i => 
+            `<div class="feed-item"><b>${i.n}</b> <span style="color:var(--accent)">${i.v}</span></div>`
+        ).join('');
+    }
+
+    // Загрузка интерфейса
+    const user = localStorage.getItem('user');
+    if(user) {
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('user-profile').classList.remove('hidden');
+        document.getElementById('hello-text').innerText = "ПРИВЕТ, " + user.toUpperCase();
+        document.getElementById('u-bal').innerText = localStorage.getItem('bal');
+    }
+    updateFeeds();
+</script>
+
+</body>
+</html>
