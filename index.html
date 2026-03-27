@@ -1,225 +1,110 @@
+<?php
+// 1. НАСТРОЙКИ
+$project_id = '12345'; 
+$secret_key = 'ВАШ_СЕКРЕТНЫЙ_КЛЮЧ'; 
+$db_file = 'store.db'; 
+$admin_pass = 'admin123'; // ИЗМЕНИТЕ ЭТОТ ПАРОЛЬ!
+
+// 2. ИНИЦИАЛИЗАЦИЯ БД
+$db = new PDO("sqlite:$db_file");
+$db->exec("CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pay_id TEXT,
+    amount REAL,
+    status TEXT,
+    plugin_name TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+
+// 3. АДМИН-ПАНЕЛЬ (Доступ по ссылке site.ru/?admin)
+if (isset($_GET['admin'])) {
+    if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_PW'] != $admin_pass) {
+        header('WWW-Authenticate: Basic realm="Admin Panel"');
+        header('HTTP/1.0 401 Unauthorized');
+        die('Доступ запрещен');
+    }
+    
+    $rows = $db->query("SELECT * FROM payments ORDER BY id DESC")->fetchAll();
+    echo "<body style='background:#1b1c17; color:#eee; font-family:sans-serif; padding:20px;'>";
+    echo "<h2>Панель управления покупками</h2>";
+    echo "<table border='1' style='width:100%; border-collapse:collapse; text-align:left;'>
+            <tr style='background:#5c7e10'><th>ID</th><th>Заказ</th><th>Сумма</th><th>Статус</th><th>Плагин</th><th>Дата</th></tr>";
+    foreach($rows as $row) {
+        $color = ($row['status'] == 'paid') ? '#2ecc71' : '#e74c3c';
+        echo "<tr>
+                <td>{$row['id']}</td><td>{$row['pay_id']}</td><td>{$row['amount']} руб.</td>
+                <td style='color:$color'><b>{$row['status']}</b></td><td>{$row['plugin_name']}</td><td>{$row['created_at']}</td>
+              </tr>";
+    }
+    echo "</table><br><a href='index.php' style='color:#5c7e10'>Вернуться в магазин</a></body>";
+    exit;
+}
+
+// 4. ОБРАБОТЧИК ПЛАТЕЖКИ (IPN)
+if (isset($_GET['pay_id']) && isset($_GET['sign'])) {
+    $sign = md5($_GET['currency'].':'.$_GET['amount'].':'.$secret_key.':'.$_GET['pay_id']);
+    if ($_GET['sign'] === $sign) {
+        $stmt = $db->prepare("UPDATE payments SET status = 'paid' WHERE pay_id = ?");
+        $stmt->execute([$_GET['pay_id']]);
+        
+        // Автовыдача файла
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="plugin_cs16.zip"');
+        readfile('plugin.zip'); 
+        exit;
+    }
+}
+
+// 5. СОЗДАНИЕ ЗАКАЗА
+if (isset($_POST['buy'])) {
+    $pay_id = time();
+    $amount = 450;
+    $plugin = "Army Ranks Ultimate";
+
+    $stmt = $db->prepare("INSERT INTO payments (pay_id, amount, status, plugin_name) VALUES (?, ?, 'pending', ?)");
+    $stmt->execute([$pay_id, $amount, $plugin]);
+
+    $url = "https://anypay.io?" . http_build_query([
+        'merchant_id' => $project_id, 'pay_id' => $pay_id, 'amount' => $amount,
+        'currency' => 'RUB', 'desc' => "Buy $plugin",
+        'sign' => md5($project_id.':'.$amount.':'.$pay_id.':'.'RUB'.':'.$secret_key)
+    ]);
+    header("Location: $url"); exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Магазин привилегий CS-RAGE</title>
+    <title>CS 1.6 Plugin Store + Admin</title>
     <style>
-        /* Общие стили */
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f0f13;
-            color: #fff;
-        }
-
-        header {
-            background: #1a1a20;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 2px solid #e74c3c;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        /* Сетка товаров */
-        .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        /* Карточка товара */
-        .card {
-            background: #1a1a20;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 1px solid #2c2c34;
-            text-align: center;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.2);
-            border-color: #e74c3c;
-        }
-
-        .card-header {
-            padding: 20px;
-            background: #25252d;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #e74c3c;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .price {
-            font-size: 2em;
-            margin: 15px 0;
-            color: #fff;
-        }
-
-        .price span {
-            font-size: 0.5em;
-            color: #888;
-        }
-
-        .features {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-            color: #ccc;
-            font-size: 0.9em;
-            line-height: 1.6;
-        }
-
-        .btn-buy {
-            display: inline-block;
-            background: #e74c3c;
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background 0.3s;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-buy:hover {
-            background: #c0392b;
-        }
-
-        /* Модальное окно */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #1a1a20;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            background: #25252d;
-            border: 1px solid #3d3d47;
-            color: white;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+        body { background: #1b1c17; color: #d1d1d1; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
+        .header { background: #000; padding: 40px; border-bottom: 3px solid #5c7e10; }
+        .card { background: #242520; border: 1px solid #5c7e10; border-radius: 8px; width: 320px; margin: 50px auto; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn { background: #5c7e10; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; width: 100%; border-radius: 4px; }
+        .btn:hover { background: #9ebf2d; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>CS-RAGE SHOP</h1>
-    <p>Выберите привилегию для комфортной игры</p>
-</header>
-
-<div class="container">
-    <div class="shop-grid">
-        
-        <!-- Карточка 1 -->
-        <div class="card">
-            <div class="card-header">VIP STATUS</div>
-            <div class="card-body">
-                <div class="price">150 <span>РУБ/МЕС</span></div>
-                <ul class="features">
-                    <li>Префикс [VIP] в чате</li>
-                    <li>Доступ к эксклюзивным скинам</li>
-                    <li>Резервный слот на сервере</li>
-                    <li>+20% к опыту (XP)</li>
-                </ul>
-                <button class="btn-buy" onclick="openModal('VIP STATUS')">КУПИТЬ</button>
-            </div>
-        </div>
-
-        <!-- Карточка 2 -->
-        <div class="card">
-            <div class="card-header">PREMIUM</div>
-            <div class="card-body">
-                <div class="price">300 <span>РУБ/МЕС</span></div>
-                <ul class="features">
-                    <li>Все функции VIP</li>
-                    <li>Уникальные эффекты выстрелов</li>
-                    <li>Иммунитет к кику за простой</li>
-                    <li>Доступ к !admin меню (огр.)</li>
-                </ul>
-                <button class="btn-buy" onclick="openModal('PREMIUM')">КУПИТЬ</button>
-            </div>
-        </div>
-
-        <!-- Карточка 3 -->
-        <div class="card">
-            <div class="card-header">ELITE</div>
-            <div class="card-body">
-                <div class="price">500 <span>РУБ/МЕС</span></div>
-                <ul class="features">
-                    <li>Все функции PREMIUM</li>
-                    <li>Выбор любого скина агента</li>
-                    <li>Приоритет в техподдержке</li>
-                    <li>Золотой цвет ника в табе</li>
-                </ul>
-                <button class="btn-buy" onclick="openModal('ELITE')">КУПИТЬ</button>
-            </div>
-        </div>
-
-    </div>
+<div class="header">
+    <h1>CS 1.6 AMXX SHOP</h1>
+    <p>Автоматизированная система продажи плагинов</p>
 </div>
 
-<!-- Модальное окно оформления -->
-<div id="buyModal" class="modal" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 id="modalTitle">Оформление покупки</h2>
-        <form id="orderForm">
-            <input type="text" placeholder="Ваш SteamID или Ник" required>
-            <select>
-                <option value="30">Срок: 30 дней</option>
-                <option value="90">Срок: 90 дней</option>
-                <option value="0">Навсегда</option>
-            </select>
-            <input type="email" placeholder="Ваш Email для чека" required>
-            <button type="submit" class="btn-buy" style="width: 100%; margin-top: 10px;">ПЕРЕЙТИ К ОПЛАТЕ</button>
-        </form>
-    </div>
+<div class="card">
+    <img src="https://via.placeholder.com" style="width:100%; border-radius:4px;">
+    <h2>Army Ranks Ultimate</h2>
+    <div style="font-size: 32px; color: #fff; margin: 20px 0;">450.00 ₽</div>
+    <form method="POST">
+        <button type="submit" name="buy" class="btn">КУПИТЬ ПЛАГИН</button>
+    </form>
 </div>
 
-<script>
-    function openModal(itemName) {
-        document.getElementById('modalTitle').innerText = 'Купить: ' + itemName;
-        document.getElementById('buyModal').style.display = 'flex';
-    }
-
-    function closeModal(event) {
-        document.getElementById('buyModal').style.display = 'none';
-    }
-
-    document.getElementById('orderForm').onsubmit = function(e) {
-        e.preventDefault();
-        alert('Система оплаты не подключена. Здесь должен быть переход на UnitPay или FreeKassa.');
-    };
-</script>
+<div style="margin-top: 20px; font-size: 12px; color: #444;">
+    <a href="?admin" style="color: #444; text-decoration: none;">Админ-панель</a>
+</div>
 
 </body>
 </html>
