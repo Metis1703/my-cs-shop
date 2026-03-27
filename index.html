@@ -1,110 +1,147 @@
-<?php
-// 1. НАСТРОЙКИ
-$project_id = '12345'; 
-$secret_key = 'ВАШ_СЕКРЕТНЫЙ_КЛЮЧ'; 
-$db_file = 'store.db'; 
-$admin_pass = 'admin123'; // ИЗМЕНИТЕ ЭТОТ ПАРОЛЬ!
-
-// 2. ИНИЦИАЛИЗАЦИЯ БД
-$db = new PDO("sqlite:$db_file");
-$db->exec("CREATE TABLE IF NOT EXISTS payments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    pay_id TEXT,
-    amount REAL,
-    status TEXT,
-    plugin_name TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)");
-
-// 3. АДМИН-ПАНЕЛЬ (Доступ по ссылке site.ru/?admin)
-if (isset($_GET['admin'])) {
-    if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_PW'] != $admin_pass) {
-        header('WWW-Authenticate: Basic realm="Admin Panel"');
-        header('HTTP/1.0 401 Unauthorized');
-        die('Доступ запрещен');
-    }
-    
-    $rows = $db->query("SELECT * FROM payments ORDER BY id DESC")->fetchAll();
-    echo "<body style='background:#1b1c17; color:#eee; font-family:sans-serif; padding:20px;'>";
-    echo "<h2>Панель управления покупками</h2>";
-    echo "<table border='1' style='width:100%; border-collapse:collapse; text-align:left;'>
-            <tr style='background:#5c7e10'><th>ID</th><th>Заказ</th><th>Сумма</th><th>Статус</th><th>Плагин</th><th>Дата</th></tr>";
-    foreach($rows as $row) {
-        $color = ($row['status'] == 'paid') ? '#2ecc71' : '#e74c3c';
-        echo "<tr>
-                <td>{$row['id']}</td><td>{$row['pay_id']}</td><td>{$row['amount']} руб.</td>
-                <td style='color:$color'><b>{$row['status']}</b></td><td>{$row['plugin_name']}</td><td>{$row['created_at']}</td>
-              </tr>";
-    }
-    echo "</table><br><a href='index.php' style='color:#5c7e10'>Вернуться в магазин</a></body>";
-    exit;
-}
-
-// 4. ОБРАБОТЧИК ПЛАТЕЖКИ (IPN)
-if (isset($_GET['pay_id']) && isset($_GET['sign'])) {
-    $sign = md5($_GET['currency'].':'.$_GET['amount'].':'.$secret_key.':'.$_GET['pay_id']);
-    if ($_GET['sign'] === $sign) {
-        $stmt = $db->prepare("UPDATE payments SET status = 'paid' WHERE pay_id = ?");
-        $stmt->execute([$_GET['pay_id']]);
-        
-        // Автовыдача файла
-        header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename="plugin_cs16.zip"');
-        readfile('plugin.zip'); 
-        exit;
-    }
-}
-
-// 5. СОЗДАНИЕ ЗАКАЗА
-if (isset($_POST['buy'])) {
-    $pay_id = time();
-    $amount = 450;
-    $plugin = "Army Ranks Ultimate";
-
-    $stmt = $db->prepare("INSERT INTO payments (pay_id, amount, status, plugin_name) VALUES (?, ?, 'pending', ?)");
-    $stmt->execute([$pay_id, $amount, $plugin]);
-
-    $url = "https://anypay.io?" . http_build_query([
-        'merchant_id' => $project_id, 'pay_id' => $pay_id, 'amount' => $amount,
-        'currency' => 'RUB', 'desc' => "Buy $plugin",
-        'sign' => md5($project_id.':'.$amount.':'.$pay_id.':'.'RUB'.':'.$secret_key)
-    ]);
-    header("Location: $url"); exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CS 1.6 Plugin Store + Admin</title>
+    <title>CS 1.6 PLUGIN STORE — ALL-IN-ONE</title>
     <style>
-        body { background: #1b1c17; color: #d1d1d1; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
-        .header { background: #000; padding: 40px; border-bottom: 3px solid #5c7e10; }
-        .card { background: #242520; border: 1px solid #5c7e10; border-radius: 8px; width: 320px; margin: 50px auto; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn { background: #5c7e10; color: #fff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; width: 100%; border-radius: 4px; }
-        .btn:hover { background: #9ebf2d; }
+        :root { --primary: #5c7e10; --bg: #1b1c17; --card: #242520; --text: #d1d1d1; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding-bottom: 50px; }
+        header { background: #000; padding: 30px; border-bottom: 3px solid var(--primary); text-align: center; }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 20px; }
+        
+        /* Карточка товара */
+        .plugin-card { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; transition: 0.3s; }
+        .plugin-card:hover { border-color: var(--primary); transform: translateX(10px); }
+        .price { font-size: 24px; color: #fff; font-weight: bold; }
+        .btn { background: var(--primary); color: #fff; border: none; padding: 10px 25px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn:hover { background: #76a014; }
+
+        /* Админка */
+        #admin-sec { margin-top: 50px; border-top: 1px dashed #444; padding-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+        th { background: #111; color: var(--primary); }
+        
+        .status-paid { color: #2ecc71; font-weight: bold; }
+        .badge { background: #333; padding: 2px 5px; font-size: 10px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>CS 1.6 AMXX SHOP</h1>
-    <p>Автоматизированная система продажи плагинов</p>
+<header>
+    <h1>AMXX-STORE.NET</h1>
+    <p>Магазин плагинов для серверов Counter-Strike 1.6</p>
+</header>
+
+<div class="container">
+    <h2>🎯 Доступные плагины:</h2>
+    
+    <!-- Товар 1 -->
+    <div class="plugin-card">
+        <div>
+            <span class="badge">REAPI</span>
+            <h3 style="margin: 5px 0;">Army Ranks Ultimate</h3>
+            <p style="font-size: 13px; color: #888;">Система званий + бонусы + сохранение MySQL</p>
+        </div>
+        <div style="text-align: right;">
+            <div class="price">450 ₽</div>
+            <button class="btn" onclick="buyPlugin('Army Ranks', 450)">Купить</button>
+        </div>
+    </div>
+
+    <!-- Товар 2 -->
+    <div class="plugin-card">
+        <div>
+            <span class="badge">AMXX 1.9</span>
+            <h3 style="margin: 5px 0;">Custom Weapons API</h3>
+            <p style="font-size: 13px; color: #888;">Установка любых скинов на сервер</p>
+        </div>
+        <div style="text-align: right;">
+            <div class="price">800 ₽</div>
+            <button class="btn" onclick="buyPlugin('Custom Weapons', 800)">Купить</button>
+        </div>
+    </div>
+
+    <!-- АДМИН ПАНЕЛЬ -->
+    <div id="admin-sec">
+        <h3 style="color: #555;">📊 ПАНЕЛЬ УПРАВЛЕНИЯ (Только для вас)</h3>
+        <table id="sales-table">
+            <thead>
+                <tr>
+                    <th>ID ЗАКАЗА</th>
+                    <th>ПЛАГИН</th>
+                    <th>СУММА</th>
+                    <th>СТАТУС</th>
+                    <th>ДАТА</th>
+                </tr>
+            </thead>
+            <tbody id="sales-body">
+                <!-- Сюда JS будет добавлять продажи -->
+            </tbody>
+        </table>
+        <button onclick="clearStats()" style="background:none; border:none; color:#444; cursor:pointer; font-size:10px; margin-top:10px;">[ Очистить базу ]</button>
+    </div>
 </div>
 
-<div class="card">
-    <img src="https://via.placeholder.com" style="width:100%; border-radius:4px;">
-    <h2>Army Ranks Ultimate</h2>
-    <div style="font-size: 32px; color: #fff; margin: 20px 0;">450.00 ₽</div>
-    <form method="POST">
-        <button type="submit" name="buy" class="btn">КУПИТЬ ПЛАГИН</button>
-    </form>
-</div>
+<script>
+    // Загрузка статистики из памяти браузера при старте
+    window.onload = updateAdminTable;
 
-<div style="margin-top: 20px; font-size: 12px; color: #444;">
-    <a href="?admin" style="color: #444; text-decoration: none;">Админ-панель</a>
-</div>
+    function buyPlugin(name, price) {
+        // 1. Имитируем оплату
+        let payId = "PAY-" + Math.floor(Math.random() * 10000);
+        let date = new Date().toLocaleString();
+
+        alert("⏳ Перенаправление на оплату...\n(Имитация успешной транзакции)");
+
+        setTimeout(() => {
+            // 2. Сохраняем в "Базу данных" (LocalStorage)
+            let sales = JSON.parse(localStorage.getItem('my_sales') || "[]");
+            sales.push({ id: payId, name: name, price: price, date: date });
+            localStorage.setItem('my_sales', JSON.stringify(sales));
+
+            // 3. Обновляем админку
+            updateAdminTable();
+
+            // 4. "Выдаем" файл (создаем текстовый файл-заглушку)
+            downloadFakeZip(name);
+            
+            alert("✅ Оплата принята!\nПлагин " + name + " скачивается...");
+        }, 1500);
+    }
+
+    function updateAdminTable() {
+        let sales = JSON.parse(localStorage.getItem('my_sales') || "[]");
+        let html = "";
+        sales.reverse().forEach(s => {
+            html += `<tr>
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.price} ₽</td>
+                <td class="status-paid">ОПЛАЧЕНО</td>
+                <td>${s.date}</td>
+            </tr>`;
+        });
+        document.getElementById('sales-body').innerHTML = html || "<tr><td colspan='5' style='text-align:center'>Продаж пока нет</td></tr>";
+    }
+
+    function downloadFakeZip(name) {
+        const text = "Лицензионный файл плагина: " + name + "\nБлагодарим за покупку!";
+        const blob = new Blob([text], { type: 'text/plain' });
+        const anchor = document.createElement('a');
+        anchor.download = name.replace(" ", "_") + "_full.txt";
+        anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+        anchor.click();
+    }
+
+    function clearStats() {
+        if(confirm("Удалить все данные о продажах?")) {
+            localStorage.removeItem('my_sales');
+            updateAdminTable();
+        }
+    }
+</script>
 
 </body>
 </html>
+
