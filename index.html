@@ -9,125 +9,101 @@
             --neon-gold: #ffcc00; --neon-green: #39ff14; --bg: #050505; --panel: rgba(15, 15, 20, 0.95); 
         }
         body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
-        header { background: rgba(0,0,0,0.9); padding: 15px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
+        header { background: rgba(0,0,0,0.9); padding: 10px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
         
-        .nav-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; margin: 2px; }
+        .nav-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 6px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; position: relative; }
         .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
         
+        .notify-blink { animation: blink-red 0.8s infinite alternate; border-color: var(--neon-pink) !important; color: var(--neon-pink) !important; box-shadow: 0 0 10px var(--neon-pink); }
+        @keyframes blink-red { from { opacity: 1; } to { opacity: 0.5; } }
+
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
         
-        input, select { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        input { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
         
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: #0a0a0a; padding: 35px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 320px; text-align: center; }
         
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; margin-left: 5px; color: #000; background: var(--neon-gold); }
-        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #222; }
-
-        /* Эффект Глитча */
-        .glitch {
-            font-size: 20px; font-weight: bold; text-transform: uppercase; position: relative;
-            color: var(--neon-pink); text-shadow: 0.05em 0 0 var(--neon-blue), -0.025em -0.05em 0 var(--neon-purple);
-            animation: glitch-anim 600ms infinite; margin: 0 0 15px 0;
-        }
-        @keyframes glitch-anim {
-            0% { text-shadow: 0.05em 0 0 var(--neon-blue), -0.05em -0.025em 0 var(--neon-purple); }
-            50% { text-shadow: -0.05em -0.025em 0 var(--neon-blue), 0.05em 0.05em 0 var(--neon-gold); }
-            100% { text-shadow: 0.025em 0.05em 0 var(--neon-blue), -0.05em 0 0 var(--neon-purple); }
-        }
+        .ava-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--neon-blue); object-fit: cover; background: #222; }
+        
+        .msg-box { padding: 8px; border-radius: 8px; margin-bottom: 5px; font-size: 12px; display: flex; align-items: flex-start; gap: 8px; }
+        .msg-in { background: rgba(0, 242, 255, 0.1); border-left: 3px solid var(--neon-blue); }
+        .msg-out { background: rgba(188, 19, 254, 0.1); border-right: 3px solid var(--neon-purple); flex-direction: row-reverse; text-align: right; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h1 style="color:var(--neon-blue); margin-top:0">CYBER_HUB</h1>
+        <h1 style="color:var(--neon-blue)">CYBER_HUB</h1>
         <input type="text" id="u-login" placeholder="ЛОГИН">
         <input type="password" id="u-pass" placeholder="ПАРОЛЬ">
-        <button class="nav-btn" style="width:100%; padding:14px" onclick="auth()">ВОЙТИ / СОЗДАТЬ</button>
+        <button class="nav-btn" style="width:100%; padding:14px" onclick="auth()">CONNECT</button>
     </div>
 </div>
 
 <header id="header">
     <div style="display:flex; align-items:center; gap:12px">
-        <img id="h-ava" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--neon-blue); object-fit:cover">
-        <div><b id="h-name"></b><span id="h-badge"></span><br><span id="h-bal" style="color:var(--neon-pink)">0</span> ₽</div>
+        <img id="h-ava" class="ava-circle" src="">
+        <div><b id="h-name"></b><span id="h-badge"></span><br>
+        <span id="h-bal" style="color:var(--neon-pink)">0</span> ₽ | <span id="online-count" style="color:var(--neon-green); font-size:10px">0 online</span></div>
     </div>
     <div style="display:flex; gap:5px">
-        <button id="admin-btn" class="nav-btn" style="border-color:var(--neon-gold); color:var(--neon-gold); display:none" onclick="openPage('admin')">👑 УПРАВЛЕНИЕ</button>
-        <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
+        <button id="admin-btn" class="nav-btn" style="display:none; color:var(--neon-gold)" onclick="openPage('admin')">ADMIN</button>
+        <button class="nav-btn" onclick="openPage('shop')">MARKET</button>
+        <button id="btn-friends" class="nav-btn" onclick="openPage('friends')">FRIENDS <span id="notify-count"></span></button>
         <button class="nav-btn" onclick="openPage('main')">ПРОФИЛЬ</button>
-        <button class="nav-btn" style="border-color:red; color:red" onclick="logout()">ВЫХОД</button>
+        <button class="nav-btn" style="color:red" onclick="logout()">EXIT</button>
     </div>
 </header>
 
 <div class="container" id="main-content">
     <div id="pages">
-        <!-- ГЛАВНАЯ / ПРОФИЛЬ -->
         <div id="page-main">
             <div class="card">
-                <h3>🎒 ИНВЕНТАРЬ</h3>
-                <div id="u-inv" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
+                <h3>⚙️ ЛИЧНЫЕ ДАННЫЕ</h3>
+                <input type="text" id="u-ava-input" placeholder="Ссылка на аватарку (URL)">
+                <button class="nav-btn" onclick="updateAva()">СОХРАНИТЬ</button>
             </div>
+            <div class="card"><h3>🎒 ИНВЕНТАРЬ</h3><div id="u-inv" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px"></div></div>
         </div>
-        
-        <!-- МАГАЗИН -->
-        <div id="page-shop" style="display:none">
-            <div class="card">
-                <h3 class="glitch">💀 BLACK MARKET</h3>
-                <div id="m-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:15px;"></div>
+
+        <div id="page-shop" style="display:none"><div class="card"><h3 style="color:var(--neon-pink)">💀 BLACK MARKET</h3><div id="m-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:15px"></div></div></div>
+
+        <div id="page-friends" style="display:none">
+            <div class="card"><h3>👥 ПОЛЬЗОВАТЕЛИ</h3><div id="friends-list"></div></div>
+            <div id="chat-private" class="card" style="display:none">
+                <h3 id="chat-with-name">ЧАТ</h3>
+                <div id="private-msgs" style="height:250px; overflow-y:auto; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.3)"></div>
+                <div style="display:flex; gap:5px"><input type="text" id="p-msg-input" placeholder="Напишите..."><button class="nav-btn" onclick="sendPrivateMsg()">SEND</button></div>
             </div>
         </div>
 
-        <!-- АДМИНКА -->
         <div id="page-admin" style="display:none">
-            <div class="card">
-                <h3>📦 ВЫСТАВИТЬ ТОВАР</h3>
-                <input type="text" id="adm-n" placeholder="Имя товара">
-                <input type="number" id="adm-p" placeholder="Цена">
-                <input type="text" id="adm-link" placeholder="Ссылка на файл">
-                <button class="nav-btn" style="width:100%" onclick="createItem()">ДОБАВИТЬ В МАРКЕТ</button>
-            </div>
-            <div class="card">
-                <h3>👥 ПОЛЬЗОВАТЕЛИ</h3>
-                <div id="adm-users"></div>
-            </div>
+            <div class="card"><h3>📦 ДОБАВИТЬ ТОВАР</h3><input id="adm-n" placeholder="Название"><input id="adm-p" type="number" placeholder="Цена"><input id="adm-img" placeholder="URL фото"><input id="adm-link" placeholder="URL файла"><button class="nav-btn" style="width:100%" onclick="createItem()">ВЫСТАВИТЬ</button></div>
+            <div class="card"><h3>📊 ПРОДАЖИ</h3><div id="adm-sales" style="font-size:11px"></div></div>
         </div>
     </div>
 
-    <!-- САЙДБАР С ЧАТОМ -->
-    <div class="sidebar">
-        <div class="card">
-            <h4>💬 КАНАЛ СВЯЗИ</h4>
-            <div id="chat" style="height:300px; overflow-y:auto; font-size:12px; margin-bottom:10px; border-bottom: 1px solid #222;"></div>
-            <input type="text" id="chat-in" placeholder="Сказать..." onkeypress="if(event.key==='Enter') sendMsg()">
-        </div>
-    </div>
+    <div class="sidebar"><div class="card"><h4>💬 ОБЩИЙ ЧАТ</h4><div id="chat" style="height:400px; overflow-y:auto; font-size:12px; margin-bottom:10px"></div><input type="text" id="chat-in" placeholder="Сказать..." onkeypress="if(event.key==='Enter') sendMsg()"></div></div>
 </div>
 
 <script>
-    const MY_LOGIN = "Metis"; 
-    const MY_PASS = "1703"; 
-
-    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V1')) || { users: {}, msgs: [], market: [] };
+    const MY_LOGIN = "Metis"; const MY_PASS = "1703";
+    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V7')) || { users: {}, msgs: [], market: [], sales: [], pvt: {}, lastRead: {} };
     let user = localStorage.getItem('active_user');
+    let currentChatPartner = null;
+    const beep = new Audio('https://assets.mixkit.co');
 
-    function save() { localStorage.setItem('CYBER_DATA_V1', JSON.stringify(db)); }
+    function save() { localStorage.setItem('CYBER_DATA_V7', JSON.stringify(db)); }
 
     function auth() {
-        const l = document.getElementById('u-login').value.trim();
-        const p = document.getElementById('u-pass').value;
+        const l = document.getElementById('u-login').value.trim(), p = document.getElementById('u-pass').value;
         if(!l || !p) return;
-
-        if(l === MY_LOGIN && p !== MY_PASS) return alert("ОШИБКА ДОСТУПА!");
-
-        if(!db.users[l]) {
-            db.users[l] = { pass: btoa(p), bal: 1000, inv: [], isOwner: (l === MY_LOGIN), ava: "https://api.dicebear.com"+l };
-        } else if(atob(db.users[l].pass) !== p) {
-            return alert("Неверный пароль!");
-        }
-
+        if(l === MY_LOGIN && p !== MY_PASS) return alert("ОШИБКА ДОСТУПА");
+        if(!db.users[l]) db.users[l] = { pass: btoa(p), bal: 1000, inv: [], lastSeen: Date.now(), ava: "" };
         user = l; localStorage.setItem('active_user', l); save(); location.reload();
     }
 
@@ -136,6 +112,7 @@
         document.getElementById('header').style.display = 'flex';
         document.getElementById('main-content').style.display = 'grid';
         if(user === MY_LOGIN) document.getElementById('admin-btn').style.display = 'block';
+        setInterval(() => { db.users[user].lastSeen = Date.now(); save(); updateOnline(); checkNewMsgs(); renderChat(); }, 3000);
         init();
     }
 
@@ -143,73 +120,134 @@
         const u = db.users[user];
         document.getElementById('h-name').innerText = user;
         document.getElementById('h-bal').innerText = u.bal;
-        document.getElementById('h-ava').src = u.ava;
+        document.getElementById('h-ava').src = u.ava || `https://api.dicebear.com{user}`;
+        document.getElementById('u-ava-input').value = u.ava || '';
         if(user === MY_LOGIN) document.getElementById('h-badge').innerHTML = '<span class="badge">OWNER</span>';
-        renderInv(); renderMarket(); renderChat();
-        if(user === MY_LOGIN) renderUsers();
+        renderInv(); renderMarket(); renderChat(); renderFriends();
+        if(user === MY_LOGIN) renderSales();
+    }
+
+    function updateAva() {
+        db.users[user].ava = document.getElementById('u-ava-input').value.trim();
+        save(); init(); alert("Обновлено!");
+    }
+
+    function checkNewMsgs() {
+        let totalUnread = 0;
+        Object.keys(db.pvt).forEach(key => {
+            if(key.includes(user)) {
+                const partner = key.replace(user, '').replace('_', '');
+                const msgs = db.pvt[key];
+                if(msgs.length && msgs[msgs.length-1].f !== user && msgs[msgs.length-1].d > (db.lastRead[user + '_' + partner] || 0)) {
+                    totalUnread++;
+                    if(!window.notified) { beep.play(); window.notified = true; }
+                }
+            }
+        });
+        const btn = document.getElementById('btn-friends');
+        if(totalUnread > 0) { btn.classList.add('notify-blink'); document.getElementById('notify-count').innerText = `(${totalUnread})`; }
+        else { btn.classList.remove('notify-blink'); document.getElementById('notify-count').innerText = ''; window.notified = false; }
     }
 
     function openPage(p) {
-        document.getElementById('page-main').style.display = p === 'main' ? 'block' : 'none';
-        document.getElementById('page-shop').style.display = p === 'shop' ? 'block' : 'none';
-        document.getElementById('page-admin').style.display = p === 'admin' ? 'block' : 'none';
+        ['page-main', 'page-shop', 'page-admin', 'page-friends'].forEach(id => document.getElementById(id).style.display = 'none');
+        document.getElementById('page-' + p).style.display = 'block';
     }
 
-    function renderInv() {
-        const u = db.users[user];
-        document.getElementById('u-inv').innerHTML = u.inv.length ? u.inv.map(i => `
-            <div class="card" style="margin:0; padding:10px; font-size:11px; border-color:var(--neon-purple)">
-                <b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a>
+    function renderFriends() {
+        document.getElementById('friends-list').innerHTML = Object.keys(db.users).filter(n => n !== user).map(n => `
+            <div class="user-row" style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #222">
+                <img src="${db.users[n].ava || 'https://via.placeholder.com'}" class="ava-circle" style="width:30px; height:30px">
+                <span style="flex:1">${n} ${Date.now() - db.users[n].lastSeen < 15000 ? '🟢' : '⚪'}</span>
+                <button class="nav-btn" onclick="openPrivateChat('${n}')">ЧАТ</button>
             </div>
-        `).join('') : "<small>Пусто</small>";
+        `).join('');
+    }
+
+    function openPrivateChat(name) {
+        currentChatPartner = name;
+        db.lastRead[user + '_' + name] = Date.now();
+        save();
+        document.getElementById('chat-private').style.display = 'block';
+        document.getElementById('chat-with-name').innerText = 'СВЯЗЬ: ' + name;
+        renderPrivateMsgs();
+    }
+
+    function sendPrivateMsg() {
+        const inp = document.getElementById('p-msg-input');
+        if(!inp.value.trim() || !currentChatPartner) return;
+        const key = [user, currentChatPartner].sort().join('_');
+        if(!db.pvt[key]) db.pvt[key] = [];
+        db.pvt[key].push({ f: user, t: inp.value, d: Date.now() });
+        db.lastRead[user + '_' + currentChatPartner] = Date.now();
+        inp.value = ""; save(); renderPrivateMsgs();
+    }
+
+    function renderPrivateMsgs() {
+        const key = [user, currentChatPartner].sort().join('_');
+        document.getElementById('private-msgs').innerHTML = (db.pvt[key] || []).map(m => `
+            <div class="msg-box ${m.f === user ? 'msg-out' : 'msg-in'}">
+                <img src="${db.users[m.f].ava || 'https://via.placeholder.com'}" class="ava-circle" style="width:25px; height:25px">
+                <div><b>${m.f}:</b><br>${m.t}</div>
+            </div>
+        `).join('');
+        document.getElementById('private-msgs').scrollTop = 9999;
+    }
+
+    function buyItem(id) {
+        const it = db.market.find(x => x.id == id);
+        if(db.users[user].bal < it.p) return alert("НЕДОСТАТОЧНО СРЕДСТВ");
+        db.users[user].bal -= it.p; db.users[user].inv.push(it);
+        db.sales.push({ buyer: user, item: it.n, price: it.p, date: new Date().toLocaleString() });
+        db.msgs.push({ u: 'SYSTEM', t: `🛒 ${user} выкупил ${it.n}`, d: Date.now() });
+        save(); init();
     }
 
     function renderMarket() {
         document.getElementById('m-list').innerHTML = db.market.map(m => `
-            <div class="card" style="text-align:center; margin:0; padding:10px">
-                <b style="font-size:12px">${m.n}</b><br><small>${m.p} ₽</small><br>
-                <button class="nav-btn" style="width:100%; font-size:8px; margin-top:5px" onclick="buyItem(${m.id})">ВЗЛОМАТЬ/КУПИТЬ</button>
+            <div class="card" style="text-align:center; padding:10px">
+                <img src="${m.img || 'https://via.placeholder.com'}" style="width:100%; height:80px; object-fit:cover; border-radius:5px">
+                <div style="font-size:11px; margin:5px 0"><b>${m.n}</b></div>
+                <button class="nav-btn" style="width:100%" onclick="buyItem(${m.id})">${m.p} ₽</button>
             </div>
         `).join('');
     }
 
-    function buyItem(id) {
-        const item = db.market.find(x => x.id == id);
-        const u = db.users[user];
-        if(u.bal < item.p) return alert("НЕДОСТАТОЧНО СРЕДСТВ");
-        u.bal -= item.p;
-        u.inv.push(item);
-        db.msgs.push({ u: "SYSTEM", t: `⚡ ${user} выкупил данные [${item.n}]`, c: "var(--neon-gold)" });
-        save(); init();
+    function renderInv() {
+        document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `<div class="card" style="padding:10px; font-size:10px"><b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a></div>`).join('') || "Пусто";
     }
 
     function sendMsg() {
-        const i = document.getElementById('chat-in');
-        if(!i.value.trim()) return;
-        db.msgs.push({ u: user, t: i.value, c: (user===MY_LOGIN?"var(--neon-gold)":"#fff") });
-        if(db.msgs.length > 30) db.msgs.shift();
+        const i = document.getElementById('chat-in'); if(!i.value.trim()) return;
+        db.msgs.push({ u: user, t: i.value, a: db.users[user].ava, d: Date.now() });
+        if(db.msgs.length > 50) db.msgs.shift();
         i.value = ""; save(); renderChat();
     }
 
     function renderChat() {
-        document.getElementById('chat').innerHTML = db.msgs.map(m => `<div><b style="color:${m.c}">${m.u}:</b> ${m.t}</div>`).join('');
-        document.getElementById('chat').scrollTop = 9999;
+        document.getElementById('chat').innerHTML = db.msgs.map(m => `
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+                <img src="${m.a || (db.users[m.u] ? db.users[m.u].ava : 'https://via.placeholder.com')}" class="ava-circle" style="width:25px; height:25px">
+                <div style="font-size:11px"><b style="color:var(--neon-blue)">${m.u}:</b> ${m.t}</div>
+            </div>
+        `).join('');
+    }
+
+    function updateOnline() {
+        const count = Object.values(db.users).filter(u => Date.now() - u.lastSeen < 15000).length;
+        document.getElementById('online-count').innerText = count + " online";
     }
 
     function createItem() {
-        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), link = document.getElementById('adm-link').value;
-        if(n && p) { db.market.push({ id:Date.now(), n, p, link }); save(); init(); alert("Данные добавлены!"); }
+        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), i = document.getElementById('adm-img').value, l = document.getElementById('adm-link').value;
+        if(n && p) { db.market.push({ id:Date.now(), n, p, img:i, link:l }); save(); init(); alert("Выставлено!"); }
     }
 
-    function renderUsers() {
-        document.getElementById('adm-users').innerHTML = Object.keys(db.users).map(n => `
-            <div class="user-row"><span>${n} (${db.users[n].bal}₽)</span>
-            <button class="nav-btn" style="font-size:8px" onclick="db.users['${n}'].bal+=500;save();init();">+500</button></div>
-        `).join('');
+    function renderSales() {
+        document.getElementById('adm-sales').innerHTML = db.sales.slice().reverse().map(s => `<div style="border-bottom:1px solid #333; padding:3px; font-size:10px">${s.buyer} -> ${s.item} (${s.price}₽)</div>`).join('');
     }
 
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
-
 </body>
 </html>
