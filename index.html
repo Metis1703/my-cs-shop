@@ -10,15 +10,32 @@
         }
         body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
         header { background: rgba(0,0,0,0.9); padding: 15px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
+        
         .nav-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; margin: 2px; }
         .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+        
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
+        
         input, select { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: #0a0a0a; padding: 35px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 320px; text-align: center; }
+        
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; margin-left: 5px; color: #000; background: var(--neon-gold); }
         .user-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #222; }
+
+        /* Эффект Глитча */
+        .glitch {
+            font-size: 20px; font-weight: bold; text-transform: uppercase; position: relative;
+            color: var(--neon-pink); text-shadow: 0.05em 0 0 var(--neon-blue), -0.025em -0.05em 0 var(--neon-purple);
+            animation: glitch-anim 600ms infinite; margin: 0 0 15px 0;
+        }
+        @keyframes glitch-anim {
+            0% { text-shadow: 0.05em 0 0 var(--neon-blue), -0.05em -0.025em 0 var(--neon-purple); }
+            50% { text-shadow: -0.05em -0.025em 0 var(--neon-blue), 0.05em 0.05em 0 var(--neon-gold); }
+            100% { text-shadow: 0.025em 0.05em 0 var(--neon-blue), -0.05em 0 0 var(--neon-purple); }
+        }
     </style>
 </head>
 <body>
@@ -47,16 +64,27 @@
 
 <div class="container" id="main-content">
     <div id="pages">
+        <!-- ГЛАВНАЯ / ПРОФИЛЬ -->
         <div id="page-main">
-            <div class="card"><h3>🎒 ИНВЕНТАРЬ</h3><div id="u-inv" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div></div>
+            <div class="card">
+                <h3>🎒 ИНВЕНТАРЬ</h3>
+                <div id="u-inv" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;"></div>
+            </div>
         </div>
+        
+        <!-- МАГАЗИН -->
         <div id="page-shop" style="display:none">
-            <div class="card"><h3>🛒 МАГАЗИН CS 1.6</h3><div id="m-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:15px;"></div></div>
+            <div class="card">
+                <h3 class="glitch">💀 BLACK MARKET</h3>
+                <div id="m-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:15px;"></div>
+            </div>
         </div>
+
+        <!-- АДМИНКА -->
         <div id="page-admin" style="display:none">
             <div class="card">
                 <h3>📦 ВЫСТАВИТЬ ТОВАР</h3>
-                <input type="text" id="adm-n" placeholder="Имя">
+                <input type="text" id="adm-n" placeholder="Имя товара">
                 <input type="number" id="adm-p" placeholder="Цена">
                 <input type="text" id="adm-link" placeholder="Ссылка на файл">
                 <button class="nav-btn" style="width:100%" onclick="createItem()">ДОБАВИТЬ В МАРКЕТ</button>
@@ -67,46 +95,35 @@
             </div>
         </div>
     </div>
+
+    <!-- САЙДБАР С ЧАТОМ -->
     <div class="sidebar">
         <div class="card">
             <h4>💬 КАНАЛ СВЯЗИ</h4>
-            <div id="chat" style="height:300px; overflow-y:auto; font-size:12px; margin-bottom:10px"></div>
+            <div id="chat" style="height:300px; overflow-y:auto; font-size:12px; margin-bottom:10px; border-bottom: 1px solid #222;"></div>
             <input type="text" id="chat-in" placeholder="Сказать..." onkeypress="if(event.key==='Enter') sendMsg()">
         </div>
     </div>
 </div>
 
 <script>
-    // --- ТВОИ ПЕРСОНАЛЬНЫЕ ДАННЫЕ ---
     const MY_LOGIN = "Metis"; 
     const MY_PASS = "1703"; 
 
-    let db = JSON.parse(localStorage.getItem('CYBER_DATA_METIS_V1')) || { users: {}, msgs: [], market: [] };
+    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V1')) || { users: {}, msgs: [], market: [] };
     let user = localStorage.getItem('active_user');
 
-    function save() { localStorage.setItem('CYBER_DATA_METIS_V1', JSON.stringify(db)); }
+    function save() { localStorage.setItem('CYBER_DATA_V1', JSON.stringify(db)); }
 
     function auth() {
         const l = document.getElementById('u-login').value.trim();
         const p = document.getElementById('u-pass').value;
         if(!l || !p) return;
 
-        // Блокировка попыток занять твой ник чужим паролем
-        if(l === MY_LOGIN && p !== MY_PASS) {
-            return alert("ОШИБКА: НЕДОПУСТИМЫЙ ПАРОЛЬ ДЛЯ ДАННОГО АККАУНТА.");
-        }
+        if(l === MY_LOGIN && p !== MY_PASS) return alert("ОШИБКА ДОСТУПА!");
 
         if(!db.users[l]) {
-            // Если кто-то другой пытается зарегистрировать твой ник
-            if(l === MY_LOGIN && p !== MY_PASS) return;
-            
-            db.users[l] = { 
-                pass: btoa(p), 
-                bal: 1000, 
-                inv: [], 
-                isOwner: (l === MY_LOGIN), 
-                ava: "https://api.dicebear.com"+l 
-            };
+            db.users[l] = { pass: btoa(p), bal: 1000, inv: [], isOwner: (l === MY_LOGIN), ava: "https://api.dicebear.com"+l };
         } else if(atob(db.users[l].pass) !== p) {
             return alert("Неверный пароль!");
         }
@@ -118,9 +135,7 @@
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
         document.getElementById('main-content').style.display = 'grid';
-        if(user === MY_LOGIN) {
-            document.getElementById('admin-btn').style.display = 'block';
-        }
+        if(user === MY_LOGIN) document.getElementById('admin-btn').style.display = 'block';
         init();
     }
 
@@ -134,59 +149,67 @@
         if(user === MY_LOGIN) renderUsers();
     }
 
-    function renderUsers() {
-        document.getElementById('adm-users').innerHTML = Object.keys(db.users).map(n => `
-            <div class="user-row">
-                <span>${n} (${db.users[n].bal}₽)</span>
-                <button class="nav-btn" style="font-size:8px" onclick="db.users['${n}'].bal+=500;save();init();">+500</button>
-            </div>
-        `).join('');
+    function openPage(p) {
+        document.getElementById('page-main').style.display = p === 'main' ? 'block' : 'none';
+        document.getElementById('page-shop').style.display = p === 'shop' ? 'block' : 'none';
+        document.getElementById('page-admin').style.display = p === 'admin' ? 'block' : 'none';
     }
 
-    function createItem() {
-        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), link = document.getElementById('adm-link').value;
-        if(n && p) { db.market.push({ id:Date.now(), n, p, link }); save(); renderMarket(); alert("Товар добавлен!"); }
+    function renderInv() {
+        const u = db.users[user];
+        document.getElementById('u-inv').innerHTML = u.inv.length ? u.inv.map(i => `
+            <div class="card" style="margin:0; padding:10px; font-size:11px; border-color:var(--neon-purple)">
+                <b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a>
+            </div>
+        `).join('') : "<small>Пусто</small>";
     }
 
     function renderMarket() {
         document.getElementById('m-list').innerHTML = db.market.map(m => `
-            <div class="card" style="text-align:center; margin:0">
-                <b>${m.n}</b><br><small>${m.p} ₽</small><br>
-                <button class="nav-btn" style="width:100%; margin-top:10px" onclick="buyItem(${m.id})">КУПИТЬ</button>
+            <div class="card" style="text-align:center; margin:0; padding:10px">
+                <b style="font-size:12px">${m.n}</b><br><small>${m.p} ₽</small><br>
+                <button class="nav-btn" style="width:100%; font-size:8px; margin-top:5px" onclick="buyItem(${m.id})">ВЗЛОМАТЬ/КУПИТЬ</button>
             </div>
         `).join('');
     }
 
     function buyItem(id) {
-        const it = db.market.find(x => x.id == id);
-        if(db.users[user].bal >= it.p) {
-            db.users[user].bal -= it.p;
-            db.users[user].inv.push(it);
-            save(); init();
-        } else alert("Недостаточно средств.");
-    }
-
-    function renderInv() {
-        document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `
-            <div style="border:1px solid var(--neon-blue); padding:10px; text-align:center; border-radius:10px">
-                <small>${i.n}</small><br>
-                <a href="${i.link}" target="_blank" style="color:var(--neon-green); font-size:10px; font-weight:bold; text-decoration:none">СКАЧАТЬ</a>
-            </div>
-        `).join('');
+        const item = db.market.find(x => x.id == id);
+        const u = db.users[user];
+        if(u.bal < item.p) return alert("НЕДОСТАТОЧНО СРЕДСТВ");
+        u.bal -= item.p;
+        u.inv.push(item);
+        db.msgs.push({ u: "SYSTEM", t: `⚡ ${user} выкупил данные [${item.n}]`, c: "var(--neon-gold)" });
+        save(); init();
     }
 
     function sendMsg() {
         const i = document.getElementById('chat-in');
-        if(!i.value) return;
-        db.msgs.push({ u: user, t: i.value });
-        save(); i.value = ""; renderChat();
+        if(!i.value.trim()) return;
+        db.msgs.push({ u: user, t: i.value, c: (user===MY_LOGIN?"var(--neon-gold)":"#fff") });
+        if(db.msgs.length > 30) db.msgs.shift();
+        i.value = ""; save(); renderChat();
     }
+
     function renderChat() {
-        document.getElementById('chat').innerHTML = db.msgs.slice(-50).map(m => `<div><b>${m.u}:</b> ${m.t}</div>`).join('');
-        document.getElementById('chat').scrollTop = 99999;
+        document.getElementById('chat').innerHTML = db.msgs.map(m => `<div><b style="color:${m.c}">${m.u}:</b> ${m.t}</div>`).join('');
+        document.getElementById('chat').scrollTop = 9999;
     }
-    function openPage(p) { ["page-main", "page-shop", "page-admin"].forEach(id => document.getElementById(id).style.display = id.includes(p) ? 'block' : 'none'); }
+
+    function createItem() {
+        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), link = document.getElementById('adm-link').value;
+        if(n && p) { db.market.push({ id:Date.now(), n, p, link }); save(); init(); alert("Данные добавлены!"); }
+    }
+
+    function renderUsers() {
+        document.getElementById('adm-users').innerHTML = Object.keys(db.users).map(n => `
+            <div class="user-row"><span>${n} (${db.users[n].bal}₽)</span>
+            <button class="nav-btn" style="font-size:8px" onclick="db.users['${n}'].bal+=500;save();init();">+500</button></div>
+        `).join('');
+    }
+
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
+
 </body>
 </html>
