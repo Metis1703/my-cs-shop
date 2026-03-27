@@ -10,24 +10,18 @@
         }
         body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
         header { background: rgba(0,0,0,0.9); padding: 10px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
-        
         .nav-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 6px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; position: relative; }
         .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
-        
         .notify-blink { animation: blink-red 0.8s infinite alternate; border-color: var(--neon-pink) !important; color: var(--neon-pink) !important; box-shadow: 0 0 10px var(--neon-pink); }
         @keyframes blink-red { from { opacity: 1; } to { opacity: 0.5; } }
-
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
-        
-        input, textarea { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
-        
+        input, select { width: 100%; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        select option { background: #000; color: #fff; }
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: #0a0a0a; padding: 35px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 320px; text-align: center; }
-        
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; margin-left: 5px; color: #000; background: var(--neon-gold); }
         .ava-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--neon-blue); object-fit: cover; background: #222; }
-        
         .msg-box { padding: 8px; border-radius: 8px; margin-bottom: 5px; font-size: 12px; display: flex; align-items: flex-start; gap: 8px; }
         .msg-in { background: rgba(0, 242, 255, 0.1); border-left: 3px solid var(--neon-blue); }
         .msg-out { background: rgba(188, 19, 254, 0.1); border-right: 3px solid var(--neon-purple); flex-direction: row-reverse; text-align: right; }
@@ -86,21 +80,24 @@
 
         <div id="page-admin" style="display:none">
             <div class="card">
-                <h3>📦 МАРКЕТ</h3>
+                <h3 style="color:var(--neon-gold)">💰 ВЫДАЧА БАЛАНСА</h3>
+                <select id="adm-user-list"></select>
+                <input type="number" id="adm-give-bal" placeholder="СУММА (₽)">
+                <button class="nav-btn" style="width:100%; border-color:var(--neon-green); color:var(--neon-green)" onclick="giveMoney()">ВЫДАТЬ ДЕНЬГИ</button>
+            </div>
+            <div class="card">
+                <h3>📦 ТОВАРЫ И ПРОМО</h3>
                 <input id="adm-n" placeholder="Название товара">
                 <input id="adm-p" type="number" placeholder="Цена">
                 <input id="adm-img" placeholder="URL фото">
                 <input id="adm-link" placeholder="URL файла">
-                <button class="nav-btn" style="width:100%" onclick="createItem()">ВЫСТАВИТЬ</button>
-            </div>
-            <div class="card">
-                <h3>🎁 ПРОМОКОДЫ</h3>
-                <input id="adm-promo-name" placeholder="КОД (напр. METIS2024)">
+                <button class="nav-btn" style="width:100%" onclick="createItem()">ДОБАВИТЬ В МАРКЕТ</button>
+                <hr style="border:0; border-top:1px solid #222; margin:10px 0">
+                <input id="adm-promo-name" placeholder="КОД (напр. GIFT)">
                 <input id="adm-promo-val" type="number" placeholder="СУММА (₽)">
                 <button class="nav-btn" style="width:100%; border-color:var(--neon-gold); color:var(--neon-gold)" onclick="createPromo()">СОЗДАТЬ ПРОМО</button>
             </div>
             <div class="card">
-                <h3>🗑️ СЕРВИС</h3>
                 <button class="nav-btn" style="width:100%; border-color:red; color:red" onclick="clearChat()">ОЧИСТИТЬ ОБЩИЙ ЧАТ</button>
             </div>
             <div class="card"><h3>📊 ПРОДАЖИ</h3><div id="adm-sales" style="font-size:11px"></div></div>
@@ -111,12 +108,12 @@
 
 <script>
     const MY_LOGIN = "Metis"; const MY_PASS = "1703";
-    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V10')) || { users: {}, msgs: [], market: [], sales: [], pvt: {}, lastRead: {}, promos: {} };
+    let db = JSON.parse(localStorage.getItem('CYBER_DATA_V11')) || { users: {}, msgs: [], market: [], sales: [], pvt: {}, lastRead: {}, promos: {} };
     let user = localStorage.getItem('active_user');
     let currentChatPartner = null;
     const beep = new Audio('https://assets.mixkit.co');
 
-    function save() { localStorage.setItem('CYBER_DATA_V10', JSON.stringify(db)); }
+    function save() { localStorage.setItem('CYBER_DATA_V11', JSON.stringify(db)); }
 
     function auth() {
         const l = document.getElementById('u-login').value.trim(), p = document.getElementById('u-pass').value;
@@ -141,57 +138,56 @@
         document.getElementById('h-bal').innerText = u.bal;
         document.getElementById('h-ava').src = u.ava || `https://api.dicebear.com{user}`;
         document.getElementById('u-ava-input').value = u.ava || '';
-        if(user === MY_LOGIN) document.getElementById('h-badge').innerHTML = '<span class="badge">OWNER</span>';
+        if(user === MY_LOGIN) {
+            document.getElementById('h-badge').innerHTML = '<span class="badge">OWNER</span>';
+            renderUserSelect();
+        }
         renderInv(); renderMarket(); renderChat(); renderFriends();
         if(user === MY_LOGIN) renderSales();
     }
 
-    // --- СИСТЕМА ПРОМОКОДОВ ---
+    // --- АДМИН-ФУНКЦИЯ: ВЫДАЧА ДЕНЕГ ---
+    function renderUserSelect() {
+        const select = document.getElementById('adm-user-list');
+        select.innerHTML = Object.keys(db.users).map(n => `<option value="${n}">${n} (Тек. бал: ${db.users[n].bal}₽)</option>`).join('');
+    }
+
+    function giveMoney() {
+        const target = document.getElementById('adm-user-list').value;
+        const amount = parseInt(document.getElementById('adm-give-bal').value);
+        if(!target || isNaN(amount)) return alert("Укажите игрока и сумму!");
+        db.users[target].bal += amount;
+        save(); init();
+        alert(`Игроку ${target} успешно выдано ${amount}₽`);
+    }
+
     function createPromo() {
         const name = document.getElementById('adm-promo-name').value.trim().toUpperCase();
         const val = parseInt(document.getElementById('adm-promo-val').value);
-        if(!name || !val) return alert("Заполните данные промокода!");
-        db.promos[name] = val;
-        save(); alert(`Промокод ${name} на ${val}₽ создан!`);
-        document.getElementById('adm-promo-name').value = ""; document.getElementById('adm-promo-val').value = "";
+        if(!name || !val) return alert("Заполните данные!");
+        db.promos[name] = val; save(); alert(`Промо ${name} создан!`);
     }
 
     function activatePromo() {
         const code = document.getElementById('promo-input').value.trim().toUpperCase();
         const u = db.users[user];
-        if(!db.promos[code]) return alert("Такого промокода не существует!");
-        if(!u.usedPromos) u.usedPromos = []; // фикс для старых акков
-        if(u.usedPromos.includes(code)) return alert("Вы уже активировали этот код!");
-        
-        u.bal += db.promos[code];
-        u.usedPromos.push(code);
-        save(); init();
-        alert(`Успех! Баланс пополнен на ${db.promos[code]}₽`);
-        document.getElementById('promo-input').value = "";
+        if(!db.promos[code]) return alert("Код не найден!");
+        if(!u.usedPromos) u.usedPromos = [];
+        if(u.usedPromos.includes(code)) return alert("Уже использован!");
+        u.bal += db.promos[code]; u.usedPromos.push(code); save(); init(); alert("Баланс пополнен!");
     }
 
-    // --- ОСТАЛЬНОЕ ---
     function buyItem(id) {
         const it = db.market.find(x => x.id == id);
-        if(!it) return;
-        if(db.users[user].bal < it.p) return alert("НЕДОСТАТОЧНО СРЕДСТВ");
-        db.users[user].bal -= it.p;
-        db.users[user].inv.push({...it, buyDate: Date.now()}); 
+        if(!it || db.users[user].bal < it.p) return alert("Недостаточно средств!");
+        db.users[user].bal -= it.p; db.users[user].inv.push({...it, buyDate: Date.now()}); 
         db.sales.push({ buyer: user, item: it.n, price: it.p, date: new Date().toLocaleString() });
-        db.msgs.push({ u: 'SYSTEM', t: `🛒 ${user} приобрёл ${it.n}`, isSystem: true, d: Date.now() });
-        save(); init(); alert("Товар в инвентаре!");
+        db.msgs.push({ u: 'SYSTEM', t: `🛒 ${user} выкупил ${it.n}`, isSystem: true, d: Date.now() });
+        save(); init();
     }
 
-    function removeItem(id) {
-        if(user !== MY_LOGIN) return;
-        db.market = db.market.filter(m => m.id !== id);
-        save(); renderMarket();
-    }
-
-    function clearChat() {
-        if(user !== MY_LOGIN || !confirm("Очистить чат?")) return;
-        db.msgs = []; save(); renderChat();
-    }
+    function removeItem(id) { if(user === MY_LOGIN) { db.market = db.market.filter(m => m.id !== id); save(); renderMarket(); } }
+    function clearChat() { if(user === MY_LOGIN && confirm("Очистить чат?")) { db.msgs = []; save(); renderChat(); } }
 
     function renderMarket() {
         document.getElementById('m-list').innerHTML = db.market.map(m => `
@@ -204,37 +200,9 @@
         `).join('');
     }
 
-    function renderInv() {
-        document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `<div class="card" style="padding:10px; font-size:10px"><b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a></div>`).join('') || "Пусто";
-    }
-
-    function updateAva() {
-        db.users[user].ava = document.getElementById('u-ava-input').value.trim();
-        save(); init(); alert("Обновлено!");
-    }
-
-    function checkNewMsgs() {
-        let totalUnread = 0;
-        Object.keys(db.pvt).forEach(key => {
-            if(key.includes(user)) {
-                const partner = key.replace(user, '').replace('_', '');
-                const msgs = db.pvt[key];
-                if(msgs.length && msgs[msgs.length-1].f !== user && msgs[msgs.length-1].d > (db.lastRead[user + '_' + partner] || 0)) {
-                    totalUnread++;
-                    if(!window.notified) { beep.play(); window.notified = true; }
-                }
-            }
-        });
-        const btn = document.getElementById('btn-friends');
-        if(totalUnread > 0) { btn.classList.add('notify-blink'); document.getElementById('notify-count').innerText = `(${totalUnread})`; }
-        else { btn.classList.remove('notify-blink'); document.getElementById('notify-count').innerText = ''; window.notified = false; }
-    }
-
-    function openPage(p) {
-        ['page-main', 'page-shop', 'page-admin', 'page-friends'].forEach(id => document.getElementById(id).style.display = 'none');
-        document.getElementById('page-' + p).style.display = 'block';
-    }
-
+    function renderInv() { document.getElementById('u-inv').innerHTML = db.users[user].inv.map(i => `<div class="card" style="padding:10px; font-size:10px"><b>${i.n}</b><br><a href="${i.link}" target="_blank" style="color:var(--neon-blue)">СКАЧАТЬ</a></div>`).join('') || "Пусто"; }
+    function updateAva() { db.users[user].ava = document.getElementById('u-ava-input').value.trim(); save(); init(); }
+    function openPage(p) { ['page-main', 'page-shop', 'page-admin', 'page-friends'].forEach(id => document.getElementById(id).style.display = 'none'); document.getElementById('page-' + p).style.display = 'block'; }
     function renderFriends() {
         document.getElementById('friends-list').innerHTML = Object.keys(db.users).filter(n => n !== user).map(n => `
             <div class="user-row" style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #222">
@@ -244,57 +212,32 @@
             </div>
         `).join('');
     }
-
-    function openPrivateChat(name) {
-        currentChatPartner = name;
-        db.lastRead[user + '_' + name] = Date.now();
-        save();
-        document.getElementById('chat-private').style.display = 'block';
-        document.getElementById('chat-with-name').innerText = 'СВЯЗЬ: ' + name;
-        renderPrivateMsgs();
-    }
-
+    function openPrivateChat(name) { currentChatPartner = name; db.lastRead[user + '_' + name] = Date.now(); save(); document.getElementById('chat-private').style.display = 'block'; document.getElementById('chat-with-name').innerText = 'СВЯЗЬ: ' + name; renderPrivateMsgs(); }
     function sendPrivateMsg() {
-        const inp = document.getElementById('p-msg-input');
-        if(!inp.value.trim() || !currentChatPartner) return;
-        const key = [user, currentChatPartner].sort().join('_');
-        if(!db.pvt[key]) db.pvt[key] = [];
-        db.pvt[key].push({ f: user, t: inp.value, d: Date.now() });
-        db.lastRead[user + '_' + currentChatPartner] = Date.now();
+        const inp = document.getElementById('p-msg-input'); if(!inp.value.trim()) return;
+        const key = [user, currentChatPartner].sort().join('_'); if(!db.pvt[key]) db.pvt[key] = [];
+        db.pvt[key].push({ f: user, t: inp.value, d: Date.now() }); db.lastRead[user + '_' + currentChatPartner] = Date.now();
         inp.value = ""; save(); renderPrivateMsgs();
     }
-
     function renderPrivateMsgs() {
         const key = [user, currentChatPartner].sort().join('_');
         document.getElementById('private-msgs').innerHTML = (db.pvt[key] || []).map(m => `<div class="msg-box ${m.f === user ? 'msg-out' : 'msg-in'}"><img src="${db.users[m.f].ava || 'https://via.placeholder.com'}" class="ava-circle" style="width:25px; height:25px"><div><b>${m.f}:</b><br>${m.t}</div></div>`).join('');
         document.getElementById('private-msgs').scrollTop = 9999;
     }
-
     function sendMsg() {
         const i = document.getElementById('chat-in'); if(!i.value.trim()) return;
-        db.msgs.push({ u: user, t: i.value, a: db.users[user].ava, d: Date.now() });
-        if(db.msgs.length > 50) db.msgs.shift();
+        db.msgs.push({ u: user, t: i.value, a: db.users[user].ava, d: Date.now() }); if(db.msgs.length > 50) db.msgs.shift();
         i.value = ""; save(); renderChat();
     }
-
-    function renderChat() {
-        document.getElementById('chat').innerHTML = db.msgs.map(m => `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px"><img src="${m.a || (db.users[m.u] ? db.users[m.u].ava : 'https://via.placeholder.com')}" class="ava-circle" style="width:25px; height:25px"><div style="font-size:11px"><b style="color:${m.u===MY_LOGIN?'var(--neon-gold)':'var(--neon-blue)'}">${m.u}:</b> ${m.t}</div></div>`).join('');
+    function renderChat() { document.getElementById('chat').innerHTML = db.msgs.map(m => `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px"><img src="${m.a || (db.users[m.u] ? db.users[m.u].ava : 'https://via.placeholder.com')}" class="ava-circle" style="width:25px; height:25px"><div style="font-size:11px"><b style="color:${m.u===MY_LOGIN?'var(--neon-gold)':'var(--neon-blue)'}">${m.u}:</b> ${m.t}</div></div>`).join(''); }
+    function updateOnline() { const count = Object.values(db.users).filter(u => Date.now() - u.lastSeen < 15000).length; document.getElementById('online-count').innerText = count + " online"; }
+    function checkNewMsgs() {
+        let totalUnread = 0;
+        Object.keys(db.pvt).forEach(key => { if(key.includes(user)) { const partner = key.replace(user, '').replace('_', ''); const msgs = db.pvt[key]; if(msgs.length && msgs[msgs.length-1].f !== user && msgs[msgs.length-1].d > (db.lastRead[user + '_' + partner] || 0)) totalUnread++; } });
+        const btn = document.getElementById('btn-friends'); if(totalUnread > 0) { btn.classList.add('notify-blink'); document.getElementById('notify-count').innerText = `(${totalUnread})`; } else { btn.classList.remove('notify-blink'); document.getElementById('notify-count').innerText = ''; }
     }
-
-    function updateOnline() {
-        const count = Object.values(db.users).filter(u => Date.now() - u.lastSeen < 15000).length;
-        document.getElementById('online-count').innerText = count + " online";
-    }
-
-    function createItem() {
-        const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), i = document.getElementById('adm-img').value, l = document.getElementById('adm-link').value;
-        if(n && p) { db.market.push({ id:Date.now(), n, p, img:i, link:l }); save(); init(); alert("Выставлено!"); }
-    }
-
-    function renderSales() {
-        document.getElementById('adm-sales').innerHTML = db.sales.slice().reverse().map(s => `<div style="border-bottom:1px solid #333; padding:3px; font-size:10px">${s.buyer} -> ${s.item} (${s.price}₽)</div>`).join('');
-    }
-
+    function createItem() { const n = document.getElementById('adm-n').value, p = parseInt(document.getElementById('adm-p').value), i = document.getElementById('adm-img').value, l = document.getElementById('adm-link').value; if(n && p) { db.market.push({ id:Date.now(), n, p, img:i, link:l }); save(); init(); } }
+    function renderSales() { document.getElementById('adm-sales').innerHTML = db.sales.slice().reverse().map(s => `<div style="border-bottom:1px solid #333; padding:3px; font-size:10px">${s.buyer} -> ${s.item} (${s.price}₽)</div>`).join(''); }
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
 </body>
