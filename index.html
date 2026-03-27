@@ -19,81 +19,90 @@
         .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
         
         .avatar-gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; }
-        .ava-option { width: 50px; height: 50px; border: 2px solid #333; border-radius: 50%; cursor: pointer; transition: 0.3s; object-fit: cover; }
-        .ava-option:hover, .ava-active { border-color: var(--neon-blue); transform: scale(1.1); box-shadow: 0 0 10px var(--neon-blue); }
+        .ava-option { width: 50px; height: 50px; border: 2px solid #333; border-radius: 50%; cursor: pointer; transition: 0.3s; object-fit: cover; background: #111; }
+        .ava-active { border-color: var(--neon-blue) !important; transform: scale(1.1); box-shadow: 0 0 15px var(--neon-blue); }
 
-        .color-picker { display: flex; gap: 10px; margin-top: 10px; }
-        .color-opt { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .color-opt:hover { transform: scale(1.2); }
-        
-        /* СТИЛЬ СПИСКА ДРУЗЕЙ */
-        .friend-count { font-size: 14px; color: var(--neon-purple); font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid rgba(188, 19, 254, 0.3); padding-bottom: 5px; margin-bottom: 10px; display: block; }
-        .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .color-opt { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: inline-block; margin-right: 10px; border: 2px solid transparent; }
+        .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        #chat-box { height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; font-size: 13px; border: 1px solid rgba(255,255,255,0.05); }
+        #chat-box { height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: #0a0a0a; padding: 40px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 340px; text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 10px; }
     </style>
 </head>
 <body>
-
-<header id="header">
-    <div style="display:flex; align-items:center; gap:12px">
-        <img id="h-ava-img" src="" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--neon-blue); object-fit:cover">
-        <div><b id="h-name"></b><br><span id="h-bal" style="color:var(--neon-pink)">0</span> <small>₽</small></div>
-    </div>
-    <div style="display:flex; gap:5px">
-        <button id="admin-btn" class="nav-btn" style="border-color:var(--neon-gold); color:var(--neon-gold); display:none" onclick="openPage('admin')">👑 АДМИН</button>
-        <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
-        <button class="nav-btn" style="border-color:var(--neon-pink); color:var(--neon-pink)" onclick="openPage('profile')">ПРОФИЛЬ</button>
-        <button class="nav-btn btn-red" style="border-color:#ff3333; color:#ff3333" onclick="logout()">ВЫХОД</button>
-    </div>
-</header>
 
 <div id="auth-screen">
     <div class="auth-box">
         <h1 style="color:var(--neon-blue); margin-top:0">CYBER_SYS</h1>
         <input type="text" id="u-login" placeholder="ЛОГИН">
         <input type="password" id="u-pass" placeholder="ПАРОЛЬ">
-        <button class="nav-btn" style="width:100%; padding:14px" onclick="handleAuth()">ВХОД</button>
-        <p onclick="toggleReg()" id="t-reg" style="font-size:11px; cursor:pointer; color:var(--neon-purple); margin-top:15px">РЕГИСТРАЦИЯ</p>
+        <button class="nav-btn" style="width:100%; padding:14px" onclick="handleAuth()">ВХОД / РЕГИСТРАЦИЯ</button>
     </div>
 </div>
 
+<header id="header">
+    <div style="display:flex; align-items:center; gap:12px">
+        <img id="h-ava-img" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--neon-blue); object-fit:cover">
+        <div><b id="h-name"></b><br><span id="h-bal" style="color:var(--neon-pink)">0</span> <small>₽</small></div>
+    </div>
+    <div style="display:flex; gap:5px">
+        <button id="admin-btn" class="nav-btn" style="border-color:var(--neon-gold); color:var(--neon-gold); display:none" onclick="openPage('admin')">👑 ROOT</button>
+        <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
+        <button class="nav-btn" style="border-color:var(--neon-pink); color:var(--neon-pink)" onclick="openPage('profile')">ПРОФИЛЬ</button>
+        <button class="nav-btn" style="border-color:#ff3333; color:#ff3333" onclick="logout()">ВЫХОД</button>
+    </div>
+</header>
+
 <div class="container" id="main-content">
     <div id="pages">
-        <div id="shop-page" class="card"><h3>🛒 МАРКЕТ</h3><div id="store-list"></div></div>
+        <!-- МАРКЕТ -->
+        <div id="shop-page" class="card">
+            <h3>🛒 НЕОНОВЫЙ РЫНОК</h3>
+            <div id="market-items" class="market-grid"></div>
+        </div>
         
+        <!-- ПРОФИЛЬ -->
         <div id="profile-page" style="display:none">
+            <div class="card"><h3>👤 АВАТАР</h3><div class="avatar-gallery" id="ava-picker"></div></div>
+            <div class="card"><h3>🌈 ЦВЕТ НИКА</h3><div id="color-picker"></div></div>
             <div class="card">
-                <h3>👤 НЕОНОВЫЙ АВАТАР</h3>
-                <div class="avatar-gallery" id="ava-picker"></div>
-            </div>
-            <div class="card">
-                <h3>🌈 ЦВЕТ НИКА</h3>
-                <div class="color-picker" id="color-picker"></div>
+                <h3>🎒 ИНВЕНТАРЬ (<span id="p-inv-count">0</span>)</h3>
+                <div id="user-inventory" class="inv-grid"></div>
             </div>
             <div class="card">
                 <h3>👥 ДРУЗЬЯ (<span id="p-friend-count">0</span>)</h3>
-                <input type="text" id="friend-add-id" placeholder="Логин для поиска...">
-                <button class="nav-btn" style="width:100%" onclick="addFriend()">ДОБАВИТЬ В ДРУЗЬЯ</button>
+                <div style="display:flex; gap:10px"><input type="text" id="friend-add-id" placeholder="ID..."><button class="nav-btn" onclick="addFriend()">+</button></div>
                 <div id="friend-list-box" style="margin-top:15px"></div>
             </div>
-            <div class="card">
-                <p>Баланс: <b id="p-bal" style="color:var(--neon-pink)">0</b> ₽</p>
-                <button class="nav-btn" onclick="addMoney()">ПОПОЛНИТЬ</button>
-            </div>
+            <div class="card">Баланс: <b id="p-bal" style="color:var(--neon-pink)">0</b> ₽ <button class="nav-btn" onclick="addMoney()">+100</button></div>
         </div>
 
-        <div id="admin-page" class="card" style="display:none"><h3>👑 ROOT</h3><div id="admin-user-list"></div></div>
+        <!-- АДМИНКА -->
+        <div id="admin-page" class="card" style="display:none">
+            <h3 style="color:var(--neon-gold)">👑 ROOT TERMINAL</h3>
+            <button class="nav-btn" style="border-color:red; color:red" onclick="db.messages=[];save();renderChat();">ОЧИСТИТЬ ЧАТ</button>
+            <div class="card" style="margin-top:15px">
+                <h4>📦 СОЗДАТЬ ТОВАР</h4>
+                <input type="text" id="i-name" placeholder="Название">
+                <input type="number" id="i-price" placeholder="Цена">
+                <input type="text" id="i-icon" placeholder="Иконка (напр. 💎)">
+                <button class="nav-btn" style="width:100%" onclick="addMarketItem()">ВЫСТАВИТЬ</button>
+            </div>
+            <div id="admin-user-list"></div>
+        </div>
     </div>
 
+    <!-- ЧАТ -->
     <div class="sidebar">
         <div class="card">
-            <h4>💬 ЧАТ СЕТИ</h4>
+            <h4>💬 LIVE CHAT</h4>
             <div id="chat-box"></div>
-            <input type="text" id="chat-in" onkeypress="if(event.key==='Enter') sendChat()">
+            <input type="text" id="chat-in" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') sendChat()">
         </div>
     </div>
 </div>
@@ -110,88 +119,107 @@
     ];
     const neonColors = ["#00f2ff", "#ff00de", "#bc13fe", "#39ff14", "#ffcc00", "#ffffff"];
 
-    let db = JSON.parse(localStorage.getItem('cs_db')) || {};
+    let db = JSON.parse(localStorage.getItem('cs_db')) || { messages: [], market: [] };
     let currentUser = localStorage.getItem('active_user') || null;
-    let isRegMode = false;
 
-    if (!db[ADMIN_ID]) { db[ADMIN_ID] = { pass: btoa("creator777"), bal: 5000, ava: cyberpunkAvatars, color: "#ffcc00", friends: [], inv: [] }; save(); }
+    if (!db[ADMIN_ID]) db[ADMIN_ID] = { pass: btoa("creator777"), bal: 9999, ava: cyberpunkAvatars[0], color: "#ffcc00", friends: [], inv: [] };
+    save();
 
     window.onload = () => { if(currentUser && db[currentUser]) startSite(); };
+
+    function save() { localStorage.setItem('cs_db', JSON.stringify(db)); }
+
+    function handleAuth() {
+        const log = document.getElementById('u-login').value.trim();
+        const pass = btoa(document.getElementById('u-pass').value);
+        if(!log || !pass) return;
+        if(!db[log]) db[log] = { pass: pass, bal: 100, ava: cyberpunkAvatars[0], color: "#ffffff", friends: [], inv: [] };
+        else if(db[log].pass !== pass) return alert("Wrong pass!");
+        currentUser = log; localStorage.setItem('active_user', log); location.reload();
+    }
 
     function startSite() {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
         document.getElementById('main-content').style.display = 'grid';
-        document.getElementById('h-name').innerText = currentUser;
-        document.getElementById('h-ava-img').src = db[currentUser].ava;
-        updateUI();
-        renderPickers();
-    }
-
-    function renderPickers() {
-        document.getElementById('ava-picker').innerHTML = cyberpunkAvatars.map(url => `<img src="${url}" class="ava-option ${db[currentUser].ava === url ? 'ava-active' : ''}" onclick="setAvatar('${url}')">`).join('');
-        document.getElementById('color-picker').innerHTML = neonColors.map(color => `<div class="color-opt" style="background:${color}" onclick="setNicknameColor('${color}')"></div>`).join('');
-    }
-
-    function setAvatar(url) { db[currentUser].ava = url; save(); document.getElementById('h-ava-img').src = url; renderPickers(); }
-    function setNicknameColor(color) { db[currentUser].color = color; save(); alert("Цвет изменен!"); }
-
-    function addFriend() {
-        const f = document.getElementById('friend-add-id').value.trim();
-        if(!db[f] || f === currentUser) return alert("Пользователь не найден");
-        if(db[currentUser].friends.includes(f)) return alert("Уже в друзьях");
-        db[currentUser].friends.push(f);
-        save();
-        updateUI();
-        document.getElementById('friend-add-id').value = "";
+        if(currentUser === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
+        updateUI(); renderPickers(); renderChat(); setInterval(renderChat, 2000); renderMarket();
     }
 
     function updateUI() {
-        document.getElementById('h-bal').innerText = db[currentUser].bal;
-        if(document.getElementById('p-bal')) document.getElementById('p-bal').innerText = db[currentUser].bal;
-        if(currentUser === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
+        const u = db[currentUser];
+        document.getElementById('h-name').innerText = currentUser;
+        document.getElementById('h-name').style.color = u.color;
+        document.getElementById('h-ava-img').src = u.ava;
+        document.getElementById('h-bal').innerText = u.bal;
+        document.getElementById('p-bal').innerText = u.bal;
+        document.getElementById('p-friend-count').innerText = u.friends.length;
+        document.getElementById('p-inv-count').innerText = (u.inv || []).length;
         
-        // ОБНОВЛЕНИЕ СПИСКА ДРУЗЕЙ
-        const fList = db[currentUser].friends || [];
-        document.getElementById('p-friend-count').innerText = fList.length;
-        document.getElementById('friend-list-box').innerHTML = fList.map(f => `
-            <div class="friend-row">
-                <span>👤 ${f}</span>
-                <span style="color:var(--neon-green); font-size:9px">ONLINE</span>
-            </div>
-        `).join('') || "<small style='opacity:0.5'>Список друзей пуст</small>";
-
-        renderStore();
+        renderFriends();
+        renderInventory();
     }
 
-    function handleAuth() {
-        const l = document.getElementById('u-login').value.trim();
-        const p = btoa(document.getElementById('u-pass').value);
-        if(isRegMode) {
-            db[l] = { pass: p, bal: 0, ava: cyberpunkAvatars, color: "#00f2ff", friends: [], inv: [] };
-            save(); toggleReg(); alert("ID СОЗДАН!");
-        } else {
-            if(db[l] && db[l].pass === p) { currentUser = l; localStorage.setItem('active_user', l); startSite(); }
-            else alert("ОШИБКА");
-        }
+    function renderPickers() {
+        document.getElementById('ava-picker').innerHTML = cyberpunkAvatars.map(url => `<img src="${url}" class="ava-option ${db[currentUser].ava===url?'ava-active':''}" onclick="db['${currentUser}'].ava='${url}';save();updateUI();renderPickers();">`).join('');
+        document.getElementById('color-picker').innerHTML = neonColors.map(c => `<div class="color-opt" style="background:${c}; border: ${db[currentUser].color===c?'2px solid white':'none'}" onclick="db['${currentUser}'].color='${c}';save();updateUI();renderPickers();"></div>`).join('');
+    }
+
+    function addFriend() {
+        const f = document.getElementById('friend-add-id').value.trim();
+        if(f && db[f] && f!==currentUser && !db[currentUser].friends.includes(f)) { db[currentUser].friends.push(f); save(); updateUI(); }
+    }
+
+    function removeFriend(f) { db[currentUser].friends = db[currentUser].friends.filter(x => x!==f); save(); updateUI(); }
+
+    function renderFriends() {
+        document.getElementById('friend-list-box').innerHTML = db[currentUser].friends.map(f => `<div class="friend-row"><span style="color:${db[f].color}">${f}</span><button onclick="removeFriend('${f}')" style="color:red; background:none; border:none; cursor:pointer">✕</button></div>`).join('');
     }
 
     function sendChat() {
-        const inp = document.getElementById('chat-in');
-        if(!inp.value) return;
-        const color = db[currentUser].color || "#fff";
-        document.getElementById('chat-box').innerHTML += `<div><b style="color:${color}">${currentUser}:</b> ${inp.value}</div>`;
-        inp.value = '';
+        const i = document.getElementById('chat-in');
+        if(!i.value.trim()) return;
+        db.messages.push({user: currentUser, text: i.value, color: db[currentUser].color, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+        if(db.messages.length > 50) db.messages.shift();
+        save(); i.value = ""; renderChat();
     }
 
-    function renderStore() {
-        document.getElementById('store-list').innerHTML = `<div class="friend-row"><span>Plugin Mod V1</span><button class="nav-btn" onclick="alert('Куплено')">500 ₽</button></div>`;
+    function renderChat() {
+        const box = document.getElementById('chat-box');
+        box.innerHTML = db.messages.map(m => `<div><small style="opacity:0.4">[${m.time}]</small> <b style="color:${m.color}">${m.user}:</b> ${m.text}</div>`).join('');
+        box.scrollTop = box.scrollHeight;
     }
 
-    function openPage(p) { ['shop-page', 'profile-page', 'admin-page'].forEach(id => document.getElementById(id).style.display = 'none'); document.getElementById(p + '-page').style.display = 'block'; }
-    function toggleReg() { isRegMode = !isRegMode; document.getElementById('t-reg').innerText = isRegMode ? "ВХОД" : "РЕГИСТРАЦИЯ"; }
-    function addMoney() { db[currentUser].bal += 500; save(); updateUI(); }
-    function save() { localStorage.setItem('cs_db', JSON.stringify(db)); }
+    function addMarketItem() {
+        const n = document.getElementById('i-name').value, p = parseInt(document.getElementById('i-price').value), ic = document.getElementById('i-icon').value || "📦";
+        if(n && p) { db.market.push({id: Date.now(), name: n, price: p, icon: ic}); save(); renderMarket(); }
+    }
+
+    function renderMarket() {
+        document.getElementById('market-items').innerHTML = db.market.map(i => `<div class="card" style="text-align:center"><div>${i.icon}</div><b>${i.name}</b><br><span style="color:var(--neon-pink)">${i.price}₽</span><br><button class="nav-btn" style="width:100%" onclick="buyItem(${i.id})">BUY</button></div>`).join('');
+    }
+
+    function buyItem(id) {
+        const it = db.market.find(x => x.id === id);
+        if(db[currentUser].bal >= it.price) {
+            db[currentUser].bal -= it.price;
+            if(!db[currentUser].inv) db[currentUser].inv = [];
+            db[currentUser].inv.push(it);
+            save(); updateUI(); alert("Bought!");
+        } else alert("No money!");
+    }
+
+    function renderInventory() {
+        document.getElementById('user-inventory').innerHTML = (db[currentUser].inv || []).map(i => `<div class="card" style="padding:5px; text-align:center" title="${i.name}">${i.icon}</div>`).join('');
+    }
+
+    function openPage(p) { document.querySelectorAll('#pages > div').forEach(d => d.style.display = 'none'); document.getElementById(p + '-page').style.display = 'block'; if(p==='admin') renderAdminUsers(); }
+    
+    function renderAdminUsers() {
+        document.getElementById('admin-user-list').innerHTML = Object.keys(db).filter(k => k!=='messages' && k!=='market' && k!==ADMIN_ID).map(u => `<div class="friend-row"><span>${u} (${db[u].bal}₽)</span><button class="nav-btn" onclick="db['${u}'].bal+=500;save();renderAdminUsers();">+500</button></div>`).join('');
+    }
+
+    function addMoney() { db[currentUser].bal += 100; save(); updateUI(); }
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
 </body>
