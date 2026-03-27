@@ -2,132 +2,165 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>НЕОНОВЫЙ МАРКЕТ — ПАНЕЛЬ СОЗДАТЕЛЯ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER MARKET — SUPREME TERMINAL</title>
     <style>
         :root { 
             --neon-blue: #00f2ff; --neon-purple: #bc13fe; --neon-pink: #ff00de;
             --neon-gold: #ffcc00; --neon-red: #ff3333; --bg: #050505; 
-            --panel: rgba(15, 15, 20, 0.9); 
+            --panel: rgba(15, 15, 20, 0.95); 
         }
         body { 
             background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden;
             background-image: radial-gradient(circle at 20% 30%, rgba(188, 19, 254, 0.1) 0%, transparent 40%);
         }
-        header { background: rgba(0, 0, 0, 0.95); padding: 15px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 0 20px var(--neon-purple); }
+        body::after { content: ""; position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); z-index: 9999; pointer-events: none; background-size: 100% 3px; }
+        
+        header { background: rgba(0, 0, 0, 0.9); padding: 15px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 0 20px var(--neon-purple); backdrop-filter: blur(10px); }
 
-        .nav-btn { background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; }
+        .nav-btn { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; margin: 2px; }
         .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         .btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
-        .btn-gold:hover { background: var(--neon-gold); box-shadow: 0 0 20px var(--neon-gold); }
+        .btn-pink { border-color: var(--neon-pink); color: var(--neon-pink); }
         .btn-red { border-color: var(--neon-red); color: var(--neon-red); }
 
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
-        .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 380px; gap: 25px; }
+        .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
         input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+        input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
 
-        #chat-messages, #admin-logs { height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; font-family: monospace; font-size: 12px; }
+        .ava-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--neon-blue); object-fit: cover; }
+        
+        /* Рулетка */
+        #wheel-container { width: 220px; height: 220px; margin: 20px auto; border-radius: 50%; border: 4px solid var(--neon-blue); position: relative; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); background: conic-gradient(from 0deg, #111 0% 25%, #050505 25% 50%, #111 50% 75%, #050505 75% 100%); display: flex; align-items: center; justify-content: center; }
+        
+        /* Чат и Списки */
+        #chat-messages, #live-activity { height: 200px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; font-size: 12px; scrollbar-width: thin; }
         .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .banned { color: var(--neon-red) !important; text-decoration: line-through; }
 
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
-        .auth-box { background: #0a0a0a; padding: 40px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 340px; text-align: center; }
+        .auth-box { background: #0a0a0a; padding: 40px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 340px; text-align: center; box-shadow: 0 0 40px var(--neon-blue); }
+        
+        .glitch-title { text-transform: uppercase; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
 <header id="header">
     <div style="display:flex; align-items:center; gap:12px">
-        <div style="padding:5px; border:1px solid var(--neon-gold); border-radius:50%">👑</div>
-        <div><b id="h-name"></b><br><span id="h-bal" style="color:var(--neon-pink)">0</span> <small>БАЛАНС</small></div>
+        <img id="h-ava" src="https://i.pravatar.cc" class="ava-img">
+        <div><b id="h-name">USER</b><br><span id="h-bal" style="color:var(--neon-pink); font-weight:bold">0</span> <small>₽</small></div>
     </div>
-    <div style="display:flex; gap:8px">
-        <button id="admin-btn" class="nav-btn btn-gold" onclick="openPage('admin')" style="display:none">👑 АДМИН-ПАНЕЛЬ</button>
+    <div style="display:flex; gap:5px">
+        <button id="admin-btn" class="nav-btn btn-gold" onclick="openPage('admin')" style="display:none">👑 АДМИН</button>
+        <button class="nav-btn" style="border-color:var(--neon-pink); color:var(--neon-pink)" onclick="openPage('wheel')">🎰 РУЛЕТКА</button>
         <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
-        <button class="nav-btn" onclick="openPage('inventory')">ИНВЕНТАРЬ</button>
+        <button class="nav-btn btn-pink" onclick="openPage('profile')">ПРОФИЛЬ</button>
         <button class="nav-btn btn-red" onclick="logout()">ВЫХОД</button>
     </div>
 </header>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h1 style="color:var(--neon-blue); margin-top:0">ВХОД В СИСТЕМУ</h1>
+        <h1 class="glitch-title">CYBER_MARKET</h1>
         <input type="text" id="u-login" placeholder="ЛОГИН">
         <input type="password" id="u-pass" placeholder="ПАРОЛЬ">
-        <button class="nav-btn" style="width:100%; padding:15px; margin-top:10px" onclick="handleAuth()">АВТОРИЗАЦИЯ</button>
+        <button class="nav-btn" style="width:100%; padding:14px" onclick="handleAuth()">ВХОД В СИСТЕМУ</button>
         <p onclick="toggleReg()" id="t-reg" style="font-size:11px; cursor:pointer; color:var(--neon-purple); margin-top:20px">НЕТ АККАУНТА? РЕГИСТРАЦИЯ</p>
     </div>
 </div>
 
 <div class="container" id="main-content">
     <div id="pages">
-        <div id="shop-page" class="card"><h3>🛒 МАРКЕТ ПЛАГИНОВ</h3><div id="store-list"></div></div>
-        <div id="inventory-page" class="card" style="display:none"><h3>📦 МОИ ПОКУПКИ</h3><div id="my-items"></div></div>
-        <div id="admin-page" style="display:none">
+        <!-- МАРКЕТ -->
+        <div id="shop-page" class="card">
+            <h3 class="glitch-title">🛒 ДОСТУПНЫЕ ПЛАГИНЫ</h3>
+            <div id="store-list"></div>
+        </div>
+        
+        <!-- РУЛЕТКА -->
+        <div id="wheel-page" class="card" style="display:none; text-align:center">
+            <h3 class="glitch-title">🎰 НЕОНОВАЯ УДАЧА</h3>
+            <div style="color:var(--neon-pink); font-size:20px">▼</div>
+            <div id="wheel-container">CORE</div>
+            <button id="spin-btn" class="nav-btn" style="width:100%; margin-top:20px" onclick="spinWheel()">ЗАПУСТИТЬ ТЕРМИНАЛ</button>
+            <p id="wheel-res" style="color:var(--neon-pink); margin-top:15px; font-weight:bold"></p>
+        </div>
+
+        <!-- ПРОФИЛЬ -->
+        <div id="profile-page" style="display:none">
             <div class="card">
-                <h3 style="color:var(--neon-gold)">👑 УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ</h3>
-                <div id="admin-user-list"></div>
+                <h3>👤 ЛИЧНЫЙ КАБИНЕТ</h3>
+                <input type="text" id="ava-url" placeholder="Ссылка на аватарку">
+                <button class="nav-btn" onclick="updateAva()">СМЕНИТЬ ФОТО</button>
+                <hr style="opacity:0.1; margin:15px 0">
+                <p>Баланс: <b id="p-bal" style="color:var(--neon-blue)">0</b> ₽</p>
+                <button class="nav-btn" style="border-color:#00ff88; color:#00ff88" onclick="addMoney()">ПОПОЛНИТЬ</button>
             </div>
             <div class="card">
-                <h3 style="color:var(--neon-blue)">📜 ЛОГИ СИСТЕМЫ</h3>
-                <div id="admin-logs"></div>
+                <h3>🤝 ДРУЗЬЯ И ЛС</h3>
+                <input type="text" id="friend-id" placeholder="Логин друга">
+                <button class="nav-btn" onclick="addFriend()">ДОБАВИТЬ</button>
+                <div id="friend-list"></div>
             </div>
         </div>
+
+        <!-- АДМИНКА -->
+        <div id="admin-page" class="card" style="display:none">
+            <h3 style="color:var(--neon-gold)">👑 ROOT_ACCESS</h3>
+            <div id="admin-user-list"></div>
+        </div>
     </div>
-    <div class="card">
-        <h4>📡 ОБЩИЙ ЧАТ</h4>
-        <div id="chat-messages"></div>
-        <input type="text" id="chat-in" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendChat()">
+
+    <!-- САЙДБАР -->
+    <div class="sidebar">
+        <div class="card" style="border-color:var(--neon-pink)">
+            <h4 style="color:var(--neon-pink); margin-top:0">📡 АКТИВНОСТЬ СЕТИ</h4>
+            <div id="live-activity"></div>
+        </div>
+
+        <div class="card" style="border-color:var(--neon-gold)">
+            <h4 style="color:var(--neon-gold); margin-top:0">🏆 ТОП БОГАТЕЕВ</h4>
+            <div id="top-rich"></div>
+        </div>
+
+        <div class="card">
+            <h4>💬 ОБЩИЙ ЧАТ</h4>
+            <div id="chat-messages"></div>
+            <input type="text" id="chat-in" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') sendChat()">
+        </div>
     </div>
 </div>
 
 <script>
     const ADMIN_ID = "admin";
-    const ADMIN_PASS = btoa("creator777"); // ТВОЙ НОВЫЙ ПАРОЛЬ: creator777
+    const ADMIN_PASS = btoa("creator777");
 
     let db = JSON.parse(localStorage.getItem('cs_db')) || {};
-    let logs = JSON.parse(localStorage.getItem('cs_logs')) || [];
     let currentUser = localStorage.getItem('active_user') || null;
-    let isRegMode = false;
+    let isRegMode = false, isSpinning = false;
 
-    // Инициализация админа
-    if (!db[ADMIN_ID]) {
-        db[ADMIN_ID] = { pass: ADMIN_PASS, bal: 9999, inv: [], isBanned: false };
-        save();
-    } else {
-        db[ADMIN_ID].pass = ADMIN_PASS; // Обновляем пароль принудительно
-        save();
-    }
+    const storeItems = [
+        {id:1, n:"Army Ranks Ultimate", p:500}, 
+        {id:2, n:"VIP Menu CS2", p:350},
+        {id:3, n:"Chat RBS Neon", p:200}
+    ];
 
-    window.onload = () => { if(currentUser && db[currentUser]) checkStatus(); };
+    if (!db[ADMIN_ID]) { db[ADMIN_ID] = { pass: ADMIN_PASS, bal: 5000, ava: "https://i.pravatar.cc", friends: [], msgs: {}, inv: [], lastSpin: 0 }; save(); }
 
-    function checkStatus() {
-        if(db[currentUser].isBanned) { alert("ВАШ АККАУНТ ЗАБЛОКИРОВАН"); logout(); return; }
-        startSite();
-    }
-
-    function addLog(user, action) {
-        logs.unshift({ time: new Date().toLocaleTimeString(), user, action });
-        if(logs.length > 30) logs.pop();
-        localStorage.setItem('cs_logs', JSON.stringify(logs));
-    }
+    window.onload = () => { if(currentUser && db[currentUser]) startSite(); };
 
     function handleAuth() {
         const l = document.getElementById('u-login').value.trim();
         const p = btoa(document.getElementById('u-pass').value);
-        if(!l || !p) return alert("ЗАПОЛНИТЕ ВСЕ ПОЛЯ");
-
         if(isRegMode) {
-            if(db[l]) return alert("ЛОГИН УЖЕ ЗАНЯТ");
-            db[l] = { pass: p, bal: 0, inv: [], isBanned: false };
-            addLog("СИСТЕМА", `Новый пользователь: ${l}`);
-            save(); alert("РЕГИСТРАЦИЯ УСПЕШНА"); toggleReg();
+            if(db[l]) return alert("ID ЗАНЯТ");
+            db[l] = { pass: p, bal: 0, ava: "https://i.pravatar.cc", friends: [], msgs: {}, inv: [], lastSpin: 0 };
+            save(); toggleReg(); alert("РЕГИСТРАЦИЯ УСПЕШНА!");
         } else {
-            if(db[l] && db[l].pass === p) {
-                if(db[l].isBanned) return alert("ВЫ ЗАБАНЕНЫ");
-                currentUser = l; localStorage.setItem('active_user', l);
-                addLog(l, "Вошел в систему");
-                startSite();
-            } else alert("НЕВЕРНЫЙ ЛОГИН ИЛИ ПАРОЛЬ");
+            if(db[l] && db[l].pass === p) { currentUser = l; localStorage.setItem('active_user', l); startSite(); }
+            else alert("ОШИБКА ДОСТУПА");
         }
     }
 
@@ -135,73 +168,120 @@
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
         document.getElementById('main-content').style.display = 'grid';
-        document.getElementById('h-name').innerText = currentUser + (currentUser === ADMIN_ID ? " [СОЗДАТЕЛЬ]" : "");
+        document.getElementById('h-name').innerText = currentUser;
+        document.getElementById('h-ava').src = db[currentUser].ava;
+        updateUI();
+        addActivity(`${currentUser} подключился к сети`, 'var(--neon-blue)');
+    }
+
+    function updateUI() {
         document.getElementById('h-bal').innerText = db[currentUser].bal;
+        if(document.getElementById('p-bal')) document.getElementById('p-bal').innerText = db[currentUser].bal;
         if(currentUser === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
         renderStore();
+        renderTopRich();
+        renderFriends();
+        if(currentUser === ADMIN_ID) renderAdmin();
     }
 
-    function openPage(p) {
-        ['shop-page', 'inventory-page', 'admin-page'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.style.display = 'none';
-        });
-        document.getElementById(p + '-page').style.display = 'block';
-        if(p === 'admin') renderAdmin();
+    function addActivity(txt, col) {
+        const box = document.getElementById('live-activity');
+        box.innerHTML = `<div style="color:${col}; margin-bottom:5px">>> ${txt}</div>` + box.innerHTML;
     }
 
-    function renderAdmin() {
-        if(currentUser !== ADMIN_ID) return;
-        document.getElementById('admin-user-list').innerHTML = Object.keys(db).map(u => `
-            <div class="user-item">
-                <span class="${db[u].isBanned ? 'banned' : ''}">${u} [${db[u].bal} ₽]</span>
-                <div>
-                    <button class="nav-btn" onclick="editBal('${u}')">₽</button>
-                    <button class="nav-btn btn-red" onclick="toggleBan('${u}')">${db[u].isBanned ? 'РАЗБАН' : 'БАН'}</button>
-                </div>
-            </div>`).join('');
-        
-        document.getElementById('admin-logs').innerHTML = logs.map(l => `
-            <div>[${l.time}] <b>${l.user}</b>: ${l.action}</div>`).join('');
+    function renderTopRich() {
+        const sorted = Object.keys(db).map(u => ({u, b: db[u].bal})).sort((a,b) => b.b - a.b).slice(0,5);
+        document.getElementById('top-rich').innerHTML = sorted.map((x, i) => `<div>${i+1}. ${x.u} — <span style="color:var(--neon-gold)">${x.b} ₽</span></div>`).join('');
     }
 
-    function toggleBan(user) {
-        if(user === ADMIN_ID) return alert("НЕЛЬЗЯ ЗАБАНИТЬ СОЗДАТЕЛЯ");
-        db[user].isBanned = !db[user].isBanned;
-        addLog(ADMIN_ID, `Изменил статус бана для ${user}`);
-        save(); renderAdmin();
-    }
-
-    function editBal(u) {
-        let n = prompt("НОВЫЙ БАЛАНС ДЛЯ " + u + ":", db[u].bal);
-        if(n !== null) { 
-            db[u].bal = parseInt(n); 
-            addLog(ADMIN_ID, `Изменил баланс ${u} на ${n}`); 
-            save(); renderAdmin(); startSite(); 
+    function spinWheel() {
+        if(isSpinning) return;
+        const now = Date.now();
+        if(currentUser !== ADMIN_ID && db[currentUser].lastSpin && (now - db[currentUser].lastSpin < 86400000)) {
+            return alert("СИСТЕМА ПЕРЕЗАРЯЖАЕТСЯ (1 РАЗ В 24 ЧАСА)");
         }
+
+        isSpinning = true;
+        const wheel = document.getElementById('wheel-container');
+        const deg = Math.floor(Math.random() * 3600) + 1440;
+        wheel.style.transform = `rotate(${deg}deg)`;
+        
+        setTimeout(() => {
+            isSpinning = false;
+            db[currentUser].lastSpin = Date.now();
+            const win = Math.random() > 0.5 ? Math.floor(Math.random()*95)+5 : 0;
+            if(win > 0) {
+                db[currentUser].bal += win;
+                document.getElementById('wheel-res').innerText = `ВЫИГРЫШ: +${win} ₽`;
+                addActivity(`${currentUser} выиграл ${win} ₽ в рулетку!`, 'var(--neon-pink)');
+            } else {
+                document.getElementById('wheel-res').innerText = `НЕУДАЧА: ПОПРОБУЙТЕ ЗАВТРА`;
+            }
+            save(); updateUI();
+        }, 4000);
+    }
+
+    function buy(id) {
+        const item = storeItems.find(x => x.id === id);
+        if(db[currentUser].bal >= item.p) {
+            db[currentUser].bal -= item.p;
+            db[currentUser].inv.push(item.n);
+            save(); updateUI();
+            addActivity(`${currentUser} купил ${item.n}`, 'var(--neon-gold)');
+            alert("МОДУЛЬ УСТАНОВЛЕН");
+        } else alert("НЕДОСТАТОЧНО КРЕДИТОВ");
     }
 
     function renderStore() {
-        const items = [{id:1, n:"Army Ranks (CS2)", p:500}, {id:2, n:"VIP Menu Premium", p:300}];
-        document.getElementById('store-list').innerHTML = items.map(i => `
-            <div class="user-item"><span>${i.n}</span><button class="nav-btn" onclick="buy(${i.p}, '${i.n}')">КУПИТЬ ЗА ${i.p}₽</button></div>`).join('');
+        document.getElementById('store-list').innerHTML = storeItems.map(i => `
+            <div class="user-item">
+                <span>${i.n} — <b style="color:var(--neon-blue)">${i.p} ₽</b></span>
+                <button class="nav-btn" onclick="buy(${i.id})">КУПИТЬ</button>
+            </div>`).join('');
     }
 
-    function buy(p, n) {
-        if(db[currentUser].bal >= p) {
-            db[currentUser].bal -= p; db[currentUser].inv.push(n);
-            addLog(currentUser, `Купил модуль: ${n}`);
-            save(); startSite();
-        } else alert("НЕДОСТАТОЧНО СРЕДСТВ");
+    function renderFriends() {
+        const list = document.getElementById('friend-list');
+        if(!list) return;
+        list.innerHTML = db[currentUser].friends.map(f => `<div class="user-item"><span>👤 ${f}</span><button class="nav-btn" style="border-color:var(--neon-pink)" onclick="alert('ЛС в разработке')">ЛС</button></div>`).join('');
     }
 
-    function toggleReg() { isRegMode = !isRegMode; document.getElementById('t-reg').innerText = isRegMode ? "УЖЕ ЕСТЬ АККАУНТ? ВОЙТИ" : "НЕТ АККАУНТА? РЕГИСТРАЦИЯ"; }
+    function addFriend() {
+        const f = document.getElementById('friend-id').value.trim();
+        if(db[f] && f !== currentUser && !db[currentUser].friends.includes(f)) { db[currentUser].friends.push(f); save(); renderFriends(); }
+    }
+
+    function updateAva() {
+        const url = document.getElementById('ava-url').value;
+        if(url) { db[currentUser].ava = url; save(); startSite(); }
+    }
+
+    function addMoney() {
+        const s = prompt("ВВЕДИТЕ СУММУ:");
+        if(s) { db[currentUser].bal += parseInt(s); save(); updateUI(); }
+    }
+
+    function renderAdmin() {
+        document.getElementById('admin-user-list').innerHTML = Object.keys(db).map(u => `
+            <div class="user-item">
+                <span>${u} (${db[u].bal} ₽)</span>
+                <button class="nav-btn" onclick="db['${u}'].bal+=1000;save();updateUI();">+1000</button>
+            </div>`).join('');
+    }
+
+    function openPage(p) {
+        ['shop-page', 'wheel-page', 'profile-page', 'admin-page'].forEach(id => document.getElementById(id).style.display = 'none');
+        document.getElementById(p + '-page').style.display = 'block';
+    }
+
     function sendChat() {
         const i = document.getElementById('chat-in');
         if(!i.value) return;
         document.getElementById('chat-messages').innerHTML += `<div><b>${currentUser}:</b> ${i.value}</div>`;
         i.value = '';
     }
+
+    function toggleReg() { isRegMode = !isRegMode; document.getElementById('t-reg').innerText = isRegMode ? "ВХОД" : "РЕГИСТРАЦИЯ"; }
     function save() { localStorage.setItem('cs_db', JSON.stringify(db)); }
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
