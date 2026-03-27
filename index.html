@@ -2,251 +2,205 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CS2 MARKET — SUPREME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON MARKET — SYSTEM LOGS EDITION</title>
     <style>
-        :root { --primary: #0095ff; --bg: #0d1117; --panel: rgba(22, 27, 34, 0.9); --text: #e6edf3; --gold: #ffcc00; }
-        body { 
-            background: url('https://wallpaperaccess.com') no-repeat center center fixed;
-            background-size: cover; color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; backdrop-filter: brightness(0.5);
+        :root { 
+            --neon-blue: #00f2ff; --neon-purple: #bc13fe; --neon-pink: #ff00de;
+            --neon-gold: #ffcc00; --neon-red: #ff3333; --bg: #050505; 
+            --panel: rgba(15, 15, 20, 0.9); 
         }
-        header { background: rgba(13, 17, 23, 0.95); padding: 10px 5%; border-bottom: 1px solid var(--primary); display: none; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-        .nav-btn { background: linear-gradient(135deg, #0095ff 0%, #0055ff 100%); color: #fff; border: none; padding: 8px 15px; cursor: pointer; font-weight: 600; border-radius: 6px; text-transform: uppercase; font-size: 11px; transition: 0.3s; }
-        .nav-btn:hover { box-shadow: 0 0 15px var(--primary); transform: translateY(-1px); }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; display: none; grid-template-columns: 1fr 320px 220px; gap: 15px; }
-        .active-page { display: grid !important; }
-        .card { background: var(--panel); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        body { 
+            background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden;
+            background-image: radial-gradient(circle at 20% 30%, rgba(188, 19, 254, 0.1) 0%, transparent 40%);
+        }
+        header { background: rgba(0, 0, 0, 0.95); padding: 15px 5%; border-bottom: 2px solid var(--neon-purple); display: none; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 0 20px var(--neon-purple); }
+
+        .nav-btn { background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 8px 16px; cursor: pointer; font-weight: bold; border-radius: 4px; text-transform: uppercase; font-size: 10px; transition: 0.3s; }
+        .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        .btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
+        .btn-gold:hover { background: var(--neon-gold); box-shadow: 0 0 20px var(--neon-gold); }
+        .btn-red { border-color: var(--neon-red); color: var(--neon-red); }
+        .btn-red:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: none; grid-template-columns: 1fr 350px; gap: 25px; }
+        .card { background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid rgba(0, 242, 255, 0.2); margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid var(--neon-purple); border-radius: 5px; color: #fff; outline: none; box-sizing: border-box; }
+
+        #chat-messages, #admin-logs { height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; font-family: monospace; font-size: 12px; }
+        .log-entry { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 5px 0; color: #aaa; }
+        .log-entry b { color: var(--neon-blue); }
         
-        /* Смайлы */
-        .emoji-picker { position: absolute; bottom: 50px; left: 0; background: #161b22; border: 1px solid var(--primary); padding: 8px; display: none; grid-template-columns: repeat(5, 1fr); gap: 5px; border-radius: 8px; z-index: 100; }
-        .emoji-item { cursor: pointer; font-size: 20px; padding: 3px; transition: 0.2s; }
-        .emoji-item:hover { transform: scale(1.3); }
-        
-        #auth-screen { position: fixed; inset: 0; background: url('https://wallpaperaccess.com') center/cover; z-index: 10000; display: flex; justify-content: center; align-items: center; }
-        .auth-box { background: rgba(13, 17, 23, 0.95); padding: 35px; border-radius: 15px; border: 2px solid var(--primary); width: 340px; backdrop-filter: blur(15px); text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; box-sizing: border-box; font-size: 14px; }
-        input:focus { border-color: var(--primary); outline: none; }
-        
-        #chat-messages { height: 350px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-        .msg { background: rgba(255,255,255,0.05); margin-bottom: 5px; padding: 8px; border-radius: 6px; font-size: 13px; }
-        .online-user { display: flex; align-items: center; gap: 8px; padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; }
-        .on { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .banned { color: var(--neon-red) !important; text-decoration: line-through; }
+
+        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
+        .auth-box { background: #0a0a0a; padding: 40px; border-radius: 20px; border: 2px solid var(--neon-blue); width: 340px; text-align: center; }
     </style>
 </head>
 <body>
 
 <header id="header">
-    <div style="display:flex; align-items:center; gap:10px">
-        <img id="h-ava" style="width:35px; height:35px; border-radius:8px; border:1px solid var(--primary)">
-        <div><b id="h-name" style="color:#fff"></b><br><span id="h-bal" style="color:var(--primary); font-size:12px">0</span> ₽</div>
+    <div style="display:flex; align-items:center; gap:12px">
+        <img src="https://i.pravatar.cc" style="width:40px; border-radius:50%; border:2px solid var(--neon-blue)">
+        <div><b id="h-name"></b><br><span id="h-bal" style="color:var(--neon-pink)">0</span> <small>CREDITS</small></div>
     </div>
-    <div style="display:flex; gap:6px">
-        <button class="nav-btn" onclick="openPage('shop')">МАРКЕТ</button>
-        <button class="nav-btn" style="background:#ff9900" onclick="openPage('inventory')">ИНВЕНТАРЬ</button>
-        <button class="nav-btn" onclick="openPage('cart')">🛒 [<span id="cart-count">0</span>]</button>
-        <button id="admin-btn" class="nav-btn" style="display:none; background:var(--gold); color:#000" onclick="openPage('admin')">АДМИН</button>
-        <button class="nav-btn" style="background:#ff3333" onclick="logout()">ВЫХОД</button>
+    <div style="display:flex; gap:8px">
+        <button id="admin-btn" class="nav-btn btn-gold" onclick="openPage('admin')" style="display:none">ROOT_ACCESS</button>
+        <button class="nav-btn" onclick="openPage('shop')">MARKET</button>
+        <button class="nav-btn" onclick="openPage('inventory')">STORAGE</button>
+        <button class="nav-btn btn-red" onclick="logout()">EXIT</button>
     </div>
 </header>
 
 <div id="auth-screen">
     <div class="auth-box">
-        <h2 id="auth-title" style="margin-top:0; color:#fff; letter-spacing:1px">CS2 LOGIN</h2>
-        <input type="text" id="u-login" placeholder="ЛОГИН">
-        <input type="password" id="u-pass" placeholder="ПАРОЛЬ">
-        <input type="email" id="u-email" placeholder="EMAIL" style="display:none">
-        
-        <div id="captcha-block" style="display:none; margin:10px 0; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px">
-            <p style="font-size:11px; margin:0">РЕШИТЕ: <b id="captcha-q" style="color:var(--primary)"></b></p>
-            <input type="number" id="captcha-a" placeholder="ОТВЕТ">
-        </div>
-
-        <button class="nav-btn" style="width:100%; padding:14px; font-size:13px" id="auth-main-btn" onclick="handleAuth()">ВОЙТИ</button>
-        <div style="display:flex; gap:5px; margin-top:10px">
-            <button class="nav-btn" style="flex:1; background:#333; font-size:9px" onclick="toggleAuth('reg')">РЕГИСТРАЦИЯ</button>
-            <button class="nav-btn" style="flex:1; background:#222; font-size:9px" onclick="toggleAuth('reset')">ЗАБЫЛ ПАРОЛЬ</button>
-        </div>
+        <h1 style="color:var(--neon-blue); margin-top:0">SYSTEM_LOGIN</h1>
+        <input type="text" id="u-login" placeholder="IDENTIFIER">
+        <input type="password" id="u-pass" placeholder="ACCESS_KEY">
+        <button class="nav-btn" style="width:100%; padding:15px; margin-top:10px" onclick="handleAuth()">INITIALIZE</button>
+        <p onclick="toggleReg()" id="t-reg" style="font-size:11px; cursor:pointer; color:var(--neon-purple); margin-top:20px">NEW ID? REGISTER</p>
     </div>
 </div>
 
 <div class="container" id="main-content">
     <div id="pages">
-        <div id="shop-page" class="card"><h3>🛒 МАРКЕТ ПЛАГИНОВ</h3><div id="store-list"></div></div>
-        <div id="cart-page" class="card" style="display:none"><h3>🛒 КОРЗИНА</h3><div id="cart-items" style="margin-bottom:15px"></div><p>ИТОГО: <b id="cart-total" style="color:var(--primary)">0</b> ₽</p><button class="nav-btn" style="width:100%" onclick="checkout()">ОПЛАТИТЬ</button></div>
-        <div id="inventory-page" class="card" style="display:none"><h3>📦 МОИ ПОКУПКИ</h3><div id="my-items"></div></div>
-        <div id="admin-page" class="card" style="display:none"><h3>🔐 АДМИН-ЦЕНТР</h3><div id="adm-users"></div></div>
-    </div>
-
-    <div class="card" style="display:flex; flex-direction:column; position:relative">
-        <h4>ОБЩИЙ ЧАТ</h4>
-        <div id="chat-messages"></div>
-        <div style="display:flex; gap:5px">
-            <button class="nav-btn" style="background:#444" onclick="toggleEmojis()">😊</button>
-            <input type="text" id="chat-in" placeholder="SAY..." onkeypress="if(event.key==='Enter') sendChat()">
-            <button class="nav-btn" onclick="sendChat()">OK</button>
-            <div id="emoji-list" class="emoji-picker"></div>
+        <div id="shop-page" class="card"><h3>🛒 MARKET</h3><div id="store-list"></div></div>
+        <div id="inventory-page" class="card" style="display:none"><h3>📦 MY_DATA</h3><div id="my-items"></div></div>
+        <div id="admin-page" style="display:none">
+            <div class="card">
+                <h3 style="color:var(--neon-gold)">🔐 USER_CONTROL</h3>
+                <div id="admin-user-list"></div>
+            </div>
+            <div class="card">
+                <h3 style="color:var(--neon-blue)">📜 SYSTEM_LOGS</h3>
+                <div id="admin-logs"></div>
+                <button class="nav-btn btn-red" style="margin-top:10px; width:100%" onclick="clearLogs()">WIPE ALL LOGS</button>
+            </div>
         </div>
     </div>
-
-    <div class="card"><h4>ONLINE (<span id="online-count">0</span>)</h4><div id="online-list"></div></div>
+    <div class="card">
+        <h4>📡 UPLINK_CHAT</h4>
+        <div id="chat-messages"></div>
+        <input type="text" id="chat-in" placeholder="Broadcasting..." onkeypress="if(event.key==='Enter') sendChat()">
+    </div>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('cs_db')) || {};
-    
-    // ПРОВЕРКА АДМИНА
-    if(!db['admin']) {
-        db['admin'] = {pass:'170', email:'admin@mail.ru', bal:5000, ava:'https://i.pravatar.cc', inv:[], isAdm:true, lastSeen:Date.now()};
-    } else { db['admin'].pass = '170'; db['admin'].isAdm = true; }
-    localStorage.setItem('cs_db', JSON.stringify(db));
+    let logs = JSON.parse(localStorage.getItem('cs_logs')) || [];
+    let currentUser = localStorage.getItem('active_user') || null;
+    let isRegMode = false;
+    const ADMIN_ID = "admin";
 
-    let chat = JSON.parse(localStorage.getItem('cs_chat')) || [];
-    let cur = localStorage.getItem('active_user') || null;
-    let authMode = 'login', capRes = 0, cart = [];
+    window.onload = () => { if(currentUser && db[currentUser]) checkStatus(); };
 
-    const storeItems = [
-        {id:1, n:"Army Ranks Ultimate", p:500, l:"https://disk.yandex.ru"}, 
-        {id:2, n:"Chat RBS", p:250, l:"https://disk.yandex.ru"},
-        {id:3, n:"VIP Menu CS2", p:450, l:"https://disk.yandex.ru"}
-    ];
-    const emojis = ['😊','😂','🔥','🔫','💀','😎','👍','💩','😱','🎮','❤️','✅'];
+    function checkStatus() {
+        if(db[currentUser].isBanned) { addLog("SYSTEM", `Banned user ${currentUser} tried to connect.`); logout(); return; }
+        startSite();
+    }
 
-    window.onload = () => { 
-        if(cur && db[cur]) startSite(); 
-        initEmojis(); 
-        renderStore();
-        setInterval(renderOnline, 5000); 
-    };
-
-    function toggleAuth(m) {
-        authMode = (authMode === m) ? 'login' : m;
-        document.getElementById('u-email').style.display = (authMode !== 'login') ? 'block' : 'none';
-        document.getElementById('captcha-block').style.display = (authMode !== 'login') ? 'block' : 'none';
-        document.getElementById('auth-title').innerText = authMode === 'reg' ? 'РЕГИСТРАЦИЯ' : (authMode === 'reset' ? 'ВОССТАНОВЛЕНИЕ' : 'CS2 LOGIN');
-        if(authMode !== 'login') {
-            const a = Math.floor(Math.random()*10), b = Math.floor(Math.random()*10);
-            capRes = a + b; document.getElementById('captcha-q').innerText = `${a} + ${b} = ?`;
-        }
+    function addLog(user, action) {
+        const time = new Date().toLocaleTimeString();
+        logs.unshift({ time, user, action });
+        if(logs.length > 50) logs.pop();
+        localStorage.setItem('cs_logs', JSON.stringify(logs));
     }
 
     function handleAuth() {
-        const u = document.getElementById('u-login').value.trim().toLowerCase();
-        const p = document.getElementById('u-pass').value;
-        const e = document.getElementById('u-email').value.trim();
-        const ans = parseInt(document.getElementById('captcha-a').value);
+        const l = document.getElementById('u-login').value.trim();
+        const p = btoa(document.getElementById('u-pass').value);
+        if(!l || !p) return;
 
-        if(authMode === 'reset') {
-            if(ans !== capRes) return alert("Капча неверна!");
-            const f = Object.keys(db).find(k => db[k].email === e);
-            return alert(f ? `Ваш пароль: ${db[f].pass}` : "Email не найден");
+        if(isRegMode) {
+            if(db[l]) return alert("ID TAKEN");
+            db[l] = { pass: p, bal: 0, inv: [], isBanned: false };
+            addLog("SYSTEM", `New identity created: ${l}`);
+            save(); alert("ID CREATED"); toggleReg();
+        } else {
+            if(db[l] && db[l].pass === p) {
+                if(db[l].isBanned) return alert("ACCOUNT BANNED");
+                currentUser = l; localStorage.setItem('active_user', l);
+                addLog(l, "Successfully logged in.");
+                startSite();
+            } else alert("ACCESS DENIED");
         }
-        if(authMode === 'reg') {
-            if(ans !== capRes) return alert("Капча неверна!");
-            if(db[u]) return alert("Логин занят!");
-            db[u] = {pass:p, email:e, bal:0, ava:'https://i.pravatar.cc, inv:[], lastSeen:Date.now()};
-            localStorage.setItem('cs_db', JSON.stringify(db)); alert("Успешно! Теперь войдите."); toggleAuth('login'); return;
-        }
-        const found = db[u] ? u : Object.keys(db).find(k => db[k].email === u);
-        if(found && db[found].pass === p) { 
-            cur = found; localStorage.setItem('active_user', cur); startSite(); 
-        } else alert("Неверный логин или пароль!");
     }
 
     function startSite() {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
-        document.getElementById('main-content').classList.add('active-page');
-        if(cur==='admin' || db[cur].isAdm) document.getElementById('admin-btn').style.display = 'block';
-        updateUI(); renderChat(); renderOnline();
+        document.getElementById('main-content').style.display = 'grid';
+        document.getElementById('h-name').innerText = currentUser;
+        document.getElementById('h-bal').innerText = db[currentUser].bal;
+        if(currentUser === ADMIN_ID) document.getElementById('admin-btn').style.display = 'block';
+        renderStore(); renderAdmin();
     }
 
-    function updateUI() {
-        if(!db[cur]) return;
-        document.getElementById('h-name').innerText = cur.toUpperCase();
-        document.getElementById('h-bal').innerText = db[cur].bal;
-        document.getElementById('h-ava').src = db[cur].ava;
-        document.getElementById('cart-count').innerText = cart.length;
-        db[cur].lastSeen = Date.now(); localStorage.setItem('cs_db', JSON.stringify(db));
+    function renderAdmin() {
+        if(currentUser !== ADMIN_ID) return;
+        document.getElementById('admin-user-list').innerHTML = Object.keys(db).map(u => `
+            <div class="user-item">
+                <span class="${db[u].isBanned ? 'banned' : ''}">${u} [${db[u].bal} ₽]</span>
+                <div>
+                    <button class="nav-btn" onclick="editBal('${u}')">$</button>
+                    <button class="nav-btn btn-red" onclick="toggleBan('${u}')">${db[u].isBanned ? 'UNBAN' : 'BAN'}</button>
+                </div>
+            </div>`).join('');
+        
+        document.getElementById('admin-logs').innerHTML = logs.map(l => `
+            <div class="log-entry">[${l.time}] <b>${l.user}</b>: ${l.action}</div>`).join('');
+    }
+
+    function toggleBan(user) {
+        if(user === ADMIN_ID) return;
+        db[user].isBanned = !db[user].isBanned;
+        addLog(ADMIN_ID, `${db[user].isBanned ? 'BANNED' : 'UNBANNED'} user: ${user}`);
+        save(); renderAdmin();
+    }
+
+    function editBal(u) {
+        let n = prompt("NEW BAL:", db[u].bal);
+        if(n !== null) { 
+            db[u].bal = parseInt(n); 
+            addLog(ADMIN_ID, `Modified balance for ${u} to ${n} credits.`);
+            save(); renderAdmin(); startSite(); 
+        }
+    }
+
+    function buy(p, n) {
+        if(db[currentUser].bal >= p) {
+            db[currentUser].bal -= p; db[currentUser].inv.push(n);
+            addLog(currentUser, `Purchased module: ${n} for ${p} credits.`);
+            save(); startSite();
+        } else alert("LOW BALANCE");
     }
 
     function openPage(p) {
-        ['shop','cart','inventory','admin'].forEach(id => document.getElementById(id+'-page').style.display = (id===p)?'block':'none');
-        if(p==='inventory') renderInv();
-        if(p==='cart') renderCart();
-        if(p==='admin') renderAdm();
+        ['shop-page', 'inventory-page', 'admin-page'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.display = 'none';
+        });
+        document.getElementById(p + '-page').style.display = 'block';
+        if(p === 'admin') renderAdmin();
     }
 
     function renderStore() {
-        document.getElementById('store-list').innerHTML = storeItems.map(i => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:rgba(255,255,255,0.05); border-radius:8px">
-                <span><b>${i.n}</b><br><small style="color:var(--primary)">${i.p}₽</small></span>
-                <button class="nav-btn" onclick="addToCart(${i.id})">В КОРЗИНУ</button>
-            </div>`).join('');
+        const items = [{id:1, n:"Army Ranks", p:500}, {id:2, n:"VIP CS2", p:300}];
+        document.getElementById('store-list').innerHTML = items.map(i => `
+            <div class="user-item"><span>${i.n} — <b>${i.p} ₽</b></span>
+            <button class="nav-btn" onclick="buy(${i.p}, '${i.n}')">BUY</button></div>`).join('');
     }
 
-    function addToCart(id) {
-        const item = storeItems.find(i => i.id === id);
-        if(!cart.find(c => c.id === id)) { cart.push(item); updateUI(); }
-    }
-
-    function renderCart() {
-        let total = cart.reduce((s,i)=>s+i.p,0);
-        document.getElementById('cart-items').innerHTML = cart.map(i=>`<div style="padding:5px; border-bottom:1px solid #333">• ${i.n}</div>`).join('') || "Корзина пуста";
-        document.getElementById('cart-total').innerText = total;
-    }
-
-    function checkout() {
-        let total = cart.reduce((s,i)=>s+i.p,0);
-        if(db[cur].bal >= total && cart.length) {
-            db[cur].bal -= total;
-            cart.forEach(it => db[cur].inv.push({n:it.n, l:it.l, k:'LIC-'+Math.random().toString(36).substr(2,6).toUpperCase()}));
-            cart = []; updateUI(); openPage('inventory'); alert("Покупка завершена!");
-        } else alert("Недостаточно средств!");
-    }
-
-    function renderInv() {
-        document.getElementById('my-items').innerHTML = db[cur].inv.map(i => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:12px; background:rgba(0,149,255,0.1); border:1px solid var(--primary); border-radius:8px">
-                <div><b>${i.n}</b><br><small style="color:var(--gold)">Ключ: ${i.k}</small></div>
-                <a href="${i.l}" target="_blank" class="nav-btn">СКАЧАТЬ</a>
-            </div>`).join('') || "У вас нет купленных товаров";
-    }
-
-    function initEmojis() {
-        document.getElementById('emoji-list').innerHTML = emojis.map(e => `<span class="emoji-item" onclick="addEmoji('${e}')">${e}</span>`).join('');
-    }
-    function toggleEmojis() { const el = document.getElementById('emoji-list'); el.style.display = (el.style.display==='grid')?'none':'grid'; }
-    function addEmoji(e) { document.getElementById('chat-in').value += e; toggleEmojis(); document.getElementById('chat-in').focus(); }
-
+    function clearLogs() { logs = []; localStorage.removeItem('cs_logs'); renderAdmin(); }
+    function toggleReg() { isRegMode = !isRegMode; document.getElementById('t-reg').innerText = isRegMode ? "LOGIN" : "REGISTER"; }
     function sendChat() {
-        const i = document.getElementById('chat-in'); if(!i.value) return;
-        chat.push({u:cur, m:i.value, a:db[cur].ava}); if(chat.length>30) chat.shift();
-        i.value = ''; renderChat(); localStorage.setItem('cs_chat', JSON.stringify(chat));
+        const i = document.getElementById('chat-in');
+        if(!i.value) return;
+        document.getElementById('chat-messages').innerHTML += `<div class="msg"><b>${currentUser}:</b> ${i.value}</div>`;
+        i.value = '';
     }
-    function renderChat() {
-        const isA = cur==='admin'||db[cur].isAdm;
-        document.getElementById('chat-messages').innerHTML = chat.map((c,idx) => `
-            <div class="msg"><b>${c.u.toUpperCase()}:</b> ${c.m} ${isA?`<span onclick="chat.splice(${idx},1);renderChat()" style="color:red; cursor:pointer; margin-left:10px">[X]</span>`:''}</div>`).join('');
-        document.getElementById('chat-messages').scrollTop = 9999;
-    }
-
-    function renderOnline() {
-        const now = Date.now(); let c = 0;
-        document.getElementById('online-list').innerHTML = Object.keys(db).map(u => {
-            const on = (now - (db[u].lastSeen||0) < 300000); if(on) c++;
-            return `<div class="online-user"><div class="status-dot ${on?'on':''}"></div>${u.toUpperCase()} ${db[u].isAdm?'[ADM]':''}</div>`;
-        }).join('');
-        document.getElementById('online-count').innerText = c;
-    }
-
-    function renderAdm() {
-        document.getElementById('adm-users').innerHTML = Object.keys(db).map(u => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:4px">
-                <span>${u} (${db[u].bal}₽)</span> 
-                <button class="nav-btn" style="padding:2px 8px" onclick="db['${u}'].bal+=500;localStorage.setItem('cs_db',JSON.stringify(db));renderAdm();updateUI()">+500</button>
-            </div>`).join('');
-    }
-
+    function save() { localStorage.setItem('cs_db', JSON.stringify(db)); }
     function logout() { localStorage.removeItem('active_user'); location.reload(); }
 </script>
 </body>
