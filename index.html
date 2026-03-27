@@ -143,3 +143,162 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 1.6 Market | Ежедневный Кейс</title>
+    <style>
+        :root { --main: #ff9d00; --bg: #0b0e11; --card: #161b22; --green: #00ff41; --gold: #ffd700; }
+        body { background: var(--bg); color: #c9d1d9; font-family: 'Segoe UI', sans-serif; margin: 0; padding-top: 60px; text-align: center; }
+        nav { background: #000; padding: 15px; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 2px solid var(--main); display: flex; justify-content: center; gap: 20px; }
+        nav a { color: #fff; text-decoration: none; font-weight: bold; font-size: 13px; text-transform: uppercase; cursor: pointer; }
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+        .box { background: var(--card); border: 1px solid #333; padding: 25px; border-radius: 15px; margin-bottom: 30px; }
+        
+        /* КЕЙС */
+        .case-box { border: 2px solid var(--green); box-shadow: 0 0 15px rgba(0, 255, 65, 0.1); }
+        .case-anim { font-size: 45px; font-weight: bold; color: var(--green); margin: 20px 0; height: 60px; }
+        .timer-text { font-size: 14px; color: #ff4444; margin-top: 10px; }
+
+        .btn { background: var(--main); color: #000; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; transition: 0.3s; }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; }
+        .btn-free { background: var(--green); color: #000; box-shadow: 0 0 15px rgba(0, 255, 65, 0.3); }
+        
+        .hidden { display: none; }
+        input { padding: 10px; margin: 5px; border-radius: 5px; border: 1px solid #333; background: #000; color: #fff; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a onclick="location.reload()">Главная</a>
+    <a href="#daily-case">Бесплатный кейс</a>
+    <a href="https://t.me">Поддержка</a>
+</nav>
+
+<div class="container">
+    <h1>CS <span style="color:var(--main)">MARKET</span></h1>
+
+    <!-- КАБИНЕТ -->
+    <div class="box">
+        <div id="login-form">
+            <h3>🔐 Вход в маркет</h3>
+            <input type="text" id="username" placeholder="Твой Ник">
+            <button class="btn" onclick="login()">Войти</button>
+        </div>
+        <div id="user-profile" class="hidden">
+            <h3>👤 Привет, <span id="display-name" style="color:var(--main)"></span>!</h3>
+            <div style="font-size: 24px;">Твой баланс: <b id="user-balance" style="color:var(--green)">0</b> ₽</div>
+            <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:#666; cursor:pointer; text-decoration:underline; font-size:12px;">Выйти</button>
+        </div>
+    </div>
+
+    <!-- ЕЖЕДНЕВНЫЙ КЕЙС -->
+    <div id="daily-case" class="box case-box">
+        <h2 style="color:var(--green); margin:0;">🎁 ЕЖЕДНЕВНЫЙ БОНУС</h2>
+        <p>Крути бесплатно раз в 24 часа и получай деньги на счет!</p>
+        
+        <div id="case-res" class="case-anim">🍀</div>
+        
+        <button id="spin-btn" class="btn btn-free" onclick="spinDaily()">ПОЛУЧИТЬ БОНУС</button>
+        <div id="timer" class="timer-text"></div>
+    </div>
+
+</div>
+
+<script>
+    function login() {
+        const name = document.getElementById('username').value.trim();
+        if(name.length < 2) return alert("Введите ник!");
+        localStorage.setItem('cs_user', name);
+        if(!localStorage.getItem('cs_balance')) localStorage.setItem('cs_balance', 0);
+        updateUI();
+    }
+
+    function spinDaily() {
+        const user = localStorage.getItem('cs_user');
+        if(!user) return alert("Сначала войди в аккаунт!");
+
+        const lastSpin = localStorage.getItem('last_spin_' + user);
+        const now = Date.now();
+
+        // Проверка времени (24 часа = 86400000 миллисекунд)
+        if (lastSpin && (now - lastSpin < 86400000)) {
+            return alert("Кейс будет доступен через " + getWaitTime(lastSpin));
+        }
+
+        const btn = document.getElementById('spin-btn');
+        const res = document.getElementById('case-res');
+        btn.disabled = true;
+
+        // Анимация рандома
+        let count = 0;
+        let interval = setInterval(() => {
+            res.innerText = Math.floor(Math.random() * 100) + " ₽";
+            count++;
+            if(count > 15) {
+                clearInterval(interval);
+                finalizeSpin(user, now);
+            }
+        }, 100);
+    }
+
+    function finalizeSpin(user, now) {
+        const res = document.getElementById('case-res');
+        const prizes = [5, 10, 15, 20, 30, 50, 75, 100]; // Возможные призы
+        const win = prizes[Math.floor(Math.random() * prizes.length)];
+        
+        res.innerText = win + " ₽";
+        
+        // Начисляем деньги
+        let bal = parseFloat(localStorage.getItem('cs_balance'));
+        bal += win;
+        localStorage.setItem('cs_balance', bal);
+        
+        // Сохраняем время прокрута
+        localStorage.setItem('last_spin_' + user, now);
+        
+        alert("Поздравляем! Ты выиграл " + win + " ₽ на свой баланс!");
+        updateUI();
+    }
+
+    function getWaitTime(lastSpin) {
+        const remaining = 86400000 - (Date.now() - lastSpin);
+        const hours = Math.floor(remaining / 3600000);
+        const mins = Math.floor((remaining % 3600000) / 60000);
+        return hours + "ч. " + mins + "м.";
+    }
+
+    function updateUI() {
+        const user = localStorage.getItem('cs_user');
+        const btn = document.getElementById('spin-btn');
+        const timerDiv = document.getElementById('timer');
+
+        if(user) {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('user-profile').classList.remove('hidden');
+            document.getElementById('display-name').innerText = user;
+            document.getElementById('user-balance').innerText = localStorage.getItem('cs_balance');
+
+            // Проверяем таймер для кнопки
+            const lastSpin = localStorage.getItem('last_spin_' + user);
+            if (lastSpin && (Date.now() - lastSpin < 86400000)) {
+                btn.disabled = true;
+                btn.innerText = "УЖЕ ПОЛУЧЕНО";
+                timerDiv.innerText = "Следующий бонус через: " + getWaitTime(lastSpin);
+            } else {
+                btn.disabled = false;
+                btn.innerText = "ПОЛУЧИТЬ БОНУС";
+                timerDiv.innerText = "";
+            }
+        }
+    }
+
+    // Обновлять таймер каждую минуту
+    setInterval(updateUI, 60000);
+    updateUI();
+</script>
+</body>
+</html>
