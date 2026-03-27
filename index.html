@@ -7,14 +7,13 @@
         :root { --primary: #5c7e10; --bg: #0b0b0b; --panel: #161616; --text: #d1d1d1; --gold: #ffcc00; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
 
-        /* Аватарки */
         .ava-mini { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
         .ava-chat { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--primary); object-fit: cover; margin-right: 10px; }
         .ava-profile { width: 100px; height: 100px; border-radius: 10px; border: 3px solid var(--primary); object-fit: cover; }
 
         #auth-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; }
         .auth-box { background: var(--panel); padding: 30px; border: 2px solid var(--primary); width: 320px; text-align: center; border-radius: 12px; }
-        input, textarea { width: 100%; padding: 10px; margin: 8px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; }
+        input { width: 100%; padding: 10px; margin: 8px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; }
         
         header { background: #000; padding: 10px 5%; border-bottom: 2px solid var(--primary); display: none; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .nav-btn { background: var(--primary); color: #fff; border: none; padding: 8px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
@@ -23,7 +22,6 @@
         .active-page { display: grid !important; }
         .card { background: var(--panel); padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
 
-        /* ЧАТ */
         .chat-container { background: var(--panel); border: 1px solid #333; border-radius: 10px; display: flex; flex-direction: column; height: 500px; position: sticky; top: 80px; }
         #chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .chat-msg { display: flex; align-items: flex-start; animation: fadeIn 0.3s; }
@@ -59,14 +57,13 @@
     </div>
 </header>
 
-<div class="container active-page" id="main-content">
-    <!-- Левая колонка: Контент -->
+<div class="container" id="main-content">
     <div id="pages">
         <div id="shop-page" class="card">
             <h2>🛒 Магазин плагинов</h2>
             <div style="background:#111; padding:15px; border-radius:8px; border-left:4px solid var(--primary);">
                 <h3>Army Ranks Ultimate</h3>
-                <p>Баланс: <b id="p-price">500</b> ₽</p>
+                <p>Цена: <b id="p-price">500</b> ₽</p>
                 <button class="nav-btn" onclick="buy(500, 'Army Ranks')">КУПИТЬ</button>
             </div>
         </div>
@@ -88,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Правая колонка: Чат -->
     <div class="chat-container">
         <div style="padding:10px; border-bottom:1px solid #333; font-weight:bold; color:var(--primary)">ОБЩИЙ ЧАТ</div>
         <div id="chat-messages"></div>
@@ -126,12 +122,10 @@
     function startSite() {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
-        document.getElementById('main-content').style.display = 'grid';
+        document.getElementById('main-content').classList.add('active-page');
         updateUI();
         renderChat();
     }
-
-    function logout() { sessionStorage.removeItem('active_user'); location.reload(); }
 
     function updateUI() {
         const uData = db[cur];
@@ -143,7 +137,11 @@
         localStorage.setItem('cs_chat_db', JSON.stringify(db));
     }
 
-    // ЛОГИКА ЧАТА
+    function openPage(p) {
+        document.getElementById('shop-page').style.display = p === 'shop' ? 'block' : 'none';
+        document.getElementById('profile-page').style.display = p === 'profile' ? 'block' : 'none';
+    }
+
     function sendChat() {
         const input = document.getElementById('chat-input');
         if(!input.value.trim()) return;
@@ -161,32 +159,36 @@
     }
 
     function renderChat() {
-        const container = document.getElementById('chat-messages');
-        container.innerHTML = chat.map(m => `
+        const c = document.getElementById('chat-messages');
+        c.innerHTML = chat.map(m => `
             <div class="chat-msg">
                 <img src="${m.ava}" class="ava-chat">
                 <div class="msg-body">
-                    <div class="msg-user">${m.user}</div>
+                    <div class="msg-user">${m.user.toUpperCase()}</div>
                     <div>${m.text}</div>
-                    <span class="msg-time">${m.time}</span>
+                    <div class="msg-time">${m.time}</div>
                 </div>
             </div>
         `).join('');
-        container.scrollTop = container.scrollHeight;
+        c.scrollTop = c.scrollHeight;
     }
-
-    // АВАТАРКА
-    document.getElementById('ava-input').onchange = function(e) {
-        const reader = new FileReader();
-        reader.onload = (ev) => { db[cur].ava = ev.target.result; updateUI(); renderChat(); };
-        reader.readAsDataURL(e.target.files[0]);
-    };
 
     function addMoney() { db[cur].bal += 100; updateUI(); }
-    function openPage(p) {
-        document.getElementById('shop-page').style.display = p === 'shop' ? 'block' : 'none';
-        document.getElementById('profile-page').style.display = p === 'profile' ? 'block' : 'none';
+    function buy(cost, name) {
+        if(db[cur].bal >= cost) {
+            db[cur].bal -= cost;
+            updateUI();
+            alert('Куплено: ' + name);
+        } else alert('Мало денег!');
     }
+
+    document.getElementById('ava-input').onchange = function(e) {
+        const r = new FileReader();
+        r.onload = () => { db[cur].ava = r.result; updateUI(); renderChat(); };
+        r.readAsDataURL(e.target.files[0]);
+    };
+
+    function logout() { sessionStorage.removeItem('active_user'); location.reload(); }
 </script>
 </body>
 </html>
